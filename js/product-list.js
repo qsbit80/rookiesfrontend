@@ -113,14 +113,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="product-detail.html?id=${p.id}">
           <div class="card-thumb">
             <img src="https://placehold.co/300x400/f5f5f5/999?text=${encodeURIComponent(p.brand)}" alt="${p.name}">
-            ${p.discount ? `<span class="card-badge">${p.discount}%</span>` : ""}
           </div>
           <p class="card-brand">${p.brand}</p>
           <p class="card-name">${p.name}</p>
           <div class="card-price">
-            ${p.discount ? `<span class="card-sale">${p.discount}%</span>` : ""}
             <span class="card-final">${won(p.finalPrice)}원</span>
-            ${p.discount ? `<span class="card-origin">${won(p.price)}원</span>` : ""}
           </div>
           <p class="card-review">리뷰 ${won(p.review)}</p>
         </a>

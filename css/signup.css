@@ -103,3 +103,5 @@
   .signup-block, .signup-type-select { max-width: 100%; }
   .signup-type-buttons { flex-direction: column; }
 }
+
+[hidden] { display: none !important; }

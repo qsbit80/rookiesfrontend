@@ -86,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="cart-item-right">
           <span class="ci-price">${won(lineTotal)}</span>
-          ${item.discount ? `<span class="ci-origin">${won(lineOrigin)}</span>` : ""}
           <button type="button" class="ci-remove" data-action="remove">삭제</button>
         </div>
       </li>

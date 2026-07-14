@@ -1,0 +1,106 @@
+.tabs{
+    display:flex;
+    gap:10px;
+    margin:30px 0;
+    border-bottom:1px solid #ddd;
+}
+
+.tab-btn{
+    padding:12px 24px;
+    background:#f5f5f5;
+    border:none;
+    cursor:pointer;
+    border-radius:8px 8px 0 0;
+    font-weight:600;
+}
+
+.tab-btn.active{
+    background:#111;
+    color:#fff;
+}
+
+.tab-content{
+    display:none;
+    padding-top:20px;
+}
+
+.tab-content.active{
+    display:block;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.table th,
+.table td{
+    padding:14px;
+    border-bottom:1px solid #e5e5e5;
+    text-align:left;
+}
+
+.table th{
+    background:#fafafa;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.form-grid label{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-weight:600;
+}
+
+.form-grid input,
+.form-grid select{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+.full{
+    grid-column:1 / -1;
+}
+
+.addr-row{
+    display:flex;
+    gap:10px;
+}
+
+.addr-row input{
+    flex:1;
+}
+
+.btn-outline{
+    padding:12px 18px;
+    border:1px solid #111;
+    background:#fff;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.btn-primary{
+    padding:14px 28px;
+    background:#111;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.btn-area{
+    margin-top:10px;
+}
+
+.check{
+    flex-direction:row !important;
+    align-items:center;
+    gap:8px !important;
+    font-weight:500;
+}

@@ -5,26 +5,17 @@
      ------------------------------------------------------------
      ★ 새 페이지 만드는 법 ★
      1. 이 파일을 복사해서 담당 파일명으로 저장하세요.
-        (파일명 규칙표 참고: login.html, cart.html, ...)
+        (파일명 규칙표는 README.md 참고: login.html, cart.html, ...)
      2. <title>과 <main> 안의 내용만 작성하면 됩니다.
      3. 헤더/푸터는 절대 수정하지 마세요! (전 페이지 공통)
         수정 필요하면 리더에게 요청.
      4. 페이지 전용 CSS가 필요하면 css/페이지명.css 를 만들어
-        아래 main.css 자리처럼 <link>를 추가하세요.
-        css/common.css 는 직접 수정 금지!
+        아래 <link> 자리처럼 추가하세요. css/common.css 는 수정 금지!
+     5. 로그인 필요한 페이지(cart/checkout/mypage 등)는 <main> 바로 아래
+        <script>CatchAuth.requireLogin();</script> 한 줄을 넣으세요.
 
-     ★ 파일명 규칙표 ★
-     index.html          메인/홈           (리더)
-     product-list.html   상품목록          — ?cat=카테고리, ?q=검색어 받음
-     product-detail.html 상품상세          — ?id=상품번호 받음
-     search.html         검색결과          — ?q=검색어 받음
-     cart.html           장바구니
-     checkout.html       주문/결제
-     login.html          로그인
-     signup.html         회원가입
-     mypage.html         마이페이지
-     wishlist.html       위시리스트
-     faq.html            고객센터/FAQ
+     ※ 메인 페이지는 main.html 입니다. (index.html 아님)
+     ※ 관리자 페이지는 _admin-template.html 을 쓰세요.
      ============================================================ -->
 <head>
 <meta charset="utf-8">
@@ -37,15 +28,17 @@
 </head>
 <body>
 
-<!-- 상품 카드를 쓰는 페이지라면 index.html 상단의
+<!-- 상품 카드를 쓰는 페이지라면 main.html 상단의
      SVG 실루엣 <defs> 블록을 여기에 복사하세요. -->
 
 <!-- ================= 공통 헤더 시작 (수정 금지) ================= -->
 <div class="utility">
   <div class="wrap">
     <a href="faq.html">고객센터</a>
-    <a href="login.html">로그인</a>
-    <a href="signup.html">회원가입</a>
+    <a href="login.html" data-auth="guest">로그인</a>
+    <a href="signup.html" data-auth="guest">회원가입</a>
+    <a href="mypage.html" data-auth="member">마이페이지</a>
+    <a href="#" data-auth="member" data-logout>로그아웃</a>
   </div>
 </div>
 
@@ -57,9 +50,9 @@
         <input type="text" name="q" placeholder="찾으시는 상품이 있나요?" aria-label="상품 검색">
       </form>
     </div>
-    <a class="brand" href="index.html">캐치캐치</a>
+    <a class="brand" href="main.html">캐치캐치</a>
     <div class="head-right">
-      <a href="mypage.html" aria-label="마이페이지"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></a>
+      <a href="mypage.html" id="mypageLink" aria-label="마이페이지"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></a>
       <a href="wishlist.html" aria-label="위시리스트"><svg class="icn" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.4 12 20 12 20Z"/></svg></a>
       <a href="cart.html" aria-label="장바구니"><svg class="icn" viewBox="0 0 24 24"><path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></a>
     </div>
@@ -69,6 +62,7 @@
 <nav class="cats">
   <div class="wrap">
     <a href="product-list.html">베스트</a>
+    <a href="brand.html">브랜드</a>
     <a href="product-list.html?cat=outer">아우터</a>
     <a href="product-list.html?cat=top">상의</a>
     <a href="product-list.html?cat=shirts">셔츠</a>
@@ -78,13 +72,15 @@
     <a href="product-list.html?cat=shoes">신발</a>
     <a href="product-list.html?cat=bag">가방</a>
     <a href="product-list.html?cat=acc">액세서리</a>
-    <a href="product-list.html?cat=underwear">언더웨어</a>
     <a href="product-list.html?cat=sale" style="color:var(--point)">SALE</a>
   </div>
 </nav>
 <!-- ================= 공통 헤더 끝 ================= -->
 
 <main class="wrap">
+
+  <!-- 로그인 필요한 페이지면 아래 주석을 해제:
+  <script>CatchAuth.requireLogin();</script> -->
 
   <!-- ▼▼▼ 여기부터 페이지 내용을 작성하세요 ▼▼▼ -->
 
@@ -112,7 +108,7 @@
       </div>
       <div class="foot-col">
         <h5>Shop</h5>
-        <a href="product-list.html">베스트</a><a href="product-list.html?cat=outer">아우터</a>
+        <a href="product-list.html">베스트</a><a href="brand.html">브랜드</a>
       </div>
       <div class="foot-col">
         <h5>Customer</h5>
@@ -134,6 +130,10 @@
   </div>
 </footer>
 <!-- ================= 공통 푸터 끝 ================= -->
+
+<!-- 공통 인증 모듈 (수정 금지) -->
+<script src="js/auth.js"></script>
+<!-- 페이지 전용 스크립트가 있으면 여기에 추가 -->
 
 </body>
 </html>

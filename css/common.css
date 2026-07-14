@@ -66,6 +66,10 @@ img, svg { display: block; max-width: 100%; }
   gap: 20px; height: 34px;
 }
 .utility a:hover { color: var(--ink); }
+/* 로그인 전환: 기본은 비회원(guest) 노출, 로그인 시 js/auth.js가 body.is-member 부여 */
+.utility [data-auth="member"] { display: none; }
+body.is-member .utility [data-auth="member"] { display: inline; }
+body.is-member .utility [data-auth="guest"] { display: none; }
 
 /* ---------- Header ---------- */
 header.site {

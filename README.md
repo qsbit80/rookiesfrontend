@@ -9,13 +9,20 @@
 ```
 frontend/
 ├── css/
-│   ├── common.css      ← 전 페이지 공통 스타일 (⚠️ 수정 금지, 리더만 수정)
+│   ├── common.css      ← 전 페이지 공통 스타일 (⚠️ 리더만 수정)
 │   ├── main.css        ← 메인페이지 전용
+│   ├── admin.css       ← 관리자 페이지 전용
 │   └── (페이지명).css   ← 자기 페이지 전용 CSS는 여기에 새로 만들기
-├── index.html          ← 메인페이지 (완성, 참고용으로 보세요)
-├── _template.html      ← ★ 새 페이지 만들 때 이걸 복사해서 시작 ★
+├── js/
+│   └── auth.js         ← 공통 인증 모듈 (⚠️ 리더만 수정)
+├── main.html           ← ★ 메인페이지 (완성, 참고용). index.html 아님! ★
+├── _template.html      ← ★ 일반 페이지 만들 때 복사해서 시작 ★
+├── _admin-template.html← ★ 관리자 페이지 만들 때 복사해서 시작 ★
 └── README.md           ← 이 문서
 ```
+
+> **메인페이지는 `main.html` 입니다.** (`index.html`은 옛 초안이라 저장소에 없음)
+> 홈/로고 링크는 전부 `main.html`로 연결하세요.
 
 ## 2. 페이지 담당 & 파일명 (변경 금지!)
 
@@ -26,8 +33,8 @@ frontend/
 
 | 담당 | 파일명 | 페이지 | 기능 ID | 받는 파라미터 |
 |------|--------|--------|---------|--------------|
-| Key | `index.html` | 메인/홈 ✅완성 | U-MAIN-001~006 | — |
-| Key | `js/auth.js` | 공통 인증 모듈(토큰 재발급) | U-AUTH-008 | — |
+| Key | `main.html` | 메인/홈 ✅완성 | U-MAIN-001~006 | — |
+| Key | `js/auth.js` | 공통 인증 모듈(토큰 재발급) ✅완성 | U-AUTH-008 | — |
 | Key | `checkout.html` | 결제(주문서) | U-ORDER-001~004 | — |
 | Key | `orders.html` | 주문 내역/배송추적/구매확정/교환환불 | U-ORDER-005~010 | `?orderId=` |
 | Key | `admin-login.html` | 관리자 로그인 | A-AUTH-001 | — |
@@ -42,7 +49,7 @@ frontend/
 
 > 로그인/회원가입은 팀원 A·B가 각자 진행 중이라 리더 담당에서 제외. 대신 관리자 축 전체(9페이지·13기능)를 정식으로 가져옴 — 권한 상승·관리자 IDOR·강제조정 등 진단 임팩트가 가장 큰 화면들이라 인증/거래 흐름을 설계한 리더가 맡는 게 자연스러움.
 
-### 팀원 A — 상품·장바구니 + 유저 계정
+### 팀원 A — 상품·구매 프론트 축 (고난이도, 5페이지)
 
 | 담당 | 파일명 | 페이지 | 기능 ID | 받는 파라미터 |
 |------|--------|--------|---------|--------------|
@@ -51,27 +58,34 @@ frontend/
 | A | `product-detail.html` | 상품상세 | U-PROD-001~007 | `?id=상품번호` |
 | A | `cart.html` | 장바구니 | U-CART-001~003 | — |
 | A | `review-write.html` | 리뷰 작성 | U-REVIEW-001 | `?orderId=` |
-| A | `mypage.html` | 마이페이지 요약 | U-MY-001~003, 006, 008, 009 | — |
-| A | `payment-methods.html` | 결제수단 관리 | U-MY-004~005 | — |
-| A | `points.html` | 포인트 내역 | U-MY-007 | — |
-| A | `addresses.html` | 배송지 관리 | U-ADDR-001~004 | — |
-| A | `notifications.html` | 알림 센터 | U-NOTI-001 | — |
 
-### 팀원 B — 판매자 축 전체
+### 팀원 B — 판매자 입점·상품·주문 축 (7페이지)
 
 | 담당 | 파일명 | 페이지 | 기능 ID |
 |------|--------|--------|---------|
 | B | `login.html` | 로그인 (추가 담당) | U-AUTH-001~003 |
 | B | `seller-login.html` | 판매자 로그인 | S-AUTH-001~002, 005 |
-| B | `seller-signup.html` | 판매자 회원가입 | S-AUTH-003~004 |
 | B | `seller-entry.html` | 입점 신청(서류 업로드) | S-ENTRY-001~002 |
 | B | `seller-products.html` | 내 상품 목록 | S-PROD-001, 005 |
 | B | `seller-product-form.html` | 상품 등록/수정 | S-PROD-002~004 |
 | B | `seller-orders.html` | 주문 관리 | S-ORDER-001~002 |
-| B | `seller-dashboard.html` | 대시보드 + 쿠폰 발행 요청 | S-DASH-001, S-COUPON-001 |
-| B | `seller-sales.html` | 매출/정산 | S-DASH-002~003 |
-| B | `seller-claims.html` | 교환/환불 관리 | S-CLAIM-001~003 |
-| B | `seller-qna.html` | Q&A 관리 | S-QA-001~003 |
+
+### 팀원 C — 계정·백오피스 조회/관리 축 (신규, 9페이지)
+
+> C는 새로 합류. **A의 유저 계정 계열 + B의 판매자 백오피스 계열**을 넘겨받음.
+> 전부 "조회 + 폼/테이블" 패턴이라 하나 만들면 나머지는 복붙 속도가 남 → 신규 합류자에게 적합.
+
+| 담당 | 파일명 | 페이지 | 기능 ID |
+|------|--------|--------|---------|
+| C | `mypage.html` | 마이페이지 요약 | U-MY-001~003, 006, 008, 009
+| C | `payment-methods.html` | 결제수단 관리 | U-MY-004~005
+| C | `points.html` | 포인트 내역 | U-MY-007
+| C | `addresses.html` | 배송지 관리 | U-ADDR-001~004
+| C | `notifications.html` | 알림 센터 | U-NOTI-001
+| C | `seller-dashboard.html` | 판매자 대시보드 + 쿠폰 발행 요청 | S-DASH-001, S-COUPON-001
+| C | `seller-sales.html` | 매출/정산 | S-DASH-002~003
+| C | `seller-claims.html` | 교환/환불 관리 | S-CLAIM-001~003
+| C | `seller-qna.html` | Q&A 관리 | S-QA-001~003
 
 ## 3. 새 페이지 만드는 법 (3단계)
 

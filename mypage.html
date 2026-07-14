@@ -17,12 +17,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>페이지제목 — 캐치캐치</title>
+<title>마이페이지 — 캐치캐치</title>
 <link rel="stylesheet" href="css/common.css">
-
 <link rel="stylesheet" href="css/mypage.css">
-<link rel="stylesheet" href="css/페이지명.css">
-
 </head>
 <body>
 
@@ -34,8 +31,10 @@
   <div class="wrap">
     <a href="#">고객센터</a>
     <a href="#">매장안내</a>
-    <a href="mypage.html">마이페이지</a>
-    <a href="logout.html">로그아웃</a>
+    <a href="login.html" data-auth-guest>로그인</a>
+    <a href="signup.html" data-auth-guest>회원가입</a>
+    <a href="mypage.html" data-auth-member hidden>마이페이지</a>
+    <a href="#" data-auth-member data-logout hidden>로그아웃</a>
   </div>
 </div>
 
@@ -177,6 +176,7 @@
 <!-- ================= 공통 푸터 끝 ================= -->
 
 <!-- 페이지 전용 스크립트가 있으면 여기에 추가 -->
+<script src="js/auth.js"></script>
 
 </body>
 </html>

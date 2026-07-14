@@ -5,7 +5,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   // ===== 로그인 안 했으면 로그인 페이지로 (U-HEAD-002) =====
-  if (!CatchAuth.requireLogin()) return;
+  // if (!CatchAuth.requireLogin()) return;
 
   // ===== 가짜 위시리스트 데이터 =====
   // TODO: GET /api/v1/users/me/wishlist  (U-WISH-001)

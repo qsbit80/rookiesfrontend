@@ -22,21 +22,31 @@ frontend/
 파일명은 서로 링크로 연결돼 있어서 **바꾸면 다른 사람 페이지가 깨집니다.**
 `js/auth.js`(공통 인증 모듈)와 `css/common.css`는 **리더만 수정**합니다.
 
-### Key — 거래 흐름 + 인증 인프라
+### Key — 거래 흐름 + 인증 인프라 + 관리자(최고 권한)
 
 | 담당 | 파일명 | 페이지 | 기능 ID | 받는 파라미터 |
 |------|--------|--------|---------|--------------|
 | Key | `index.html` | 메인/홈 ✅완성 | U-MAIN-001~006 | — |
-| Key | `login.html` | 로그인 | U-AUTH-001~003 | — |
-| Key | `signup.html` | 회원가입 | U-AUTH-004~007 | — |
 | Key | `js/auth.js` | 공통 인증 모듈(토큰 재발급) | U-AUTH-008 | — |
 | Key | `checkout.html` | 결제(주문서) | U-ORDER-001~004 | — |
 | Key | `orders.html` | 주문 내역/배송추적/구매확정/교환환불 | U-ORDER-005~010 | `?orderId=` |
+| Key | `admin-login.html` | 관리자 로그인 | A-AUTH-001 | — |
+| Key | `admin-users.html` | 사용자 관리 | A-USER-001 | — |
+| Key | `admin-products.html` | 전체 상품 관리(강제 제재·삭제) | A-PROD-001~002 | — |
+| Key | `admin-seller-applications.html` | 사업자 등록 승인/반려 | A-SELLER-001~002 | — |
+| Key | `admin-sellers.html` | 입점 업체 상태 관리 | A-SELLER-003 | — |
+| Key | `admin-coupons.html` | 쿠폰 발행 승인 | A-COUPON-001~002 | — |
+| Key | `admin-points.html` | 포인트 강제 조정 | A-POINT-001~002 | — |
+| Key | `admin-qna.html` | Q&A 모니터링 | A-QA-001 | — |
+| Key | `admin-settlements.html` | 플랫폼 정산 대시보드 | A-SETTLE-001 | — |
+
+> 로그인/회원가입은 팀원 A·B가 각자 진행 중이라 리더 담당에서 제외. 대신 관리자 축 전체(9페이지·13기능)를 정식으로 가져옴 — 권한 상승·관리자 IDOR·강제조정 등 진단 임팩트가 가장 큰 화면들이라 인증/거래 흐름을 설계한 리더가 맡는 게 자연스러움.
 
 ### 팀원 A — 상품·장바구니 + 유저 계정
 
 | 담당 | 파일명 | 페이지 | 기능 ID | 받는 파라미터 |
 |------|--------|--------|---------|--------------|
+| A | `signup.html` | 회원가입 (추가 담당) | U-AUTH-004~007 | — |
 | A | `product-list.html` | 상품목록 | U-MAIN-001 연계 | `?cat=카테고리` `?q=검색어` |
 | A | `product-detail.html` | 상품상세 | U-PROD-001~007 | `?id=상품번호` |
 | A | `cart.html` | 장바구니 | U-CART-001~003 | — |
@@ -51,6 +61,7 @@ frontend/
 
 | 담당 | 파일명 | 페이지 | 기능 ID |
 |------|--------|--------|---------|
+| B | `login.html` | 로그인 (추가 담당) | U-AUTH-001~003 |
 | B | `seller-login.html` | 판매자 로그인 | S-AUTH-001~002, 005 |
 | B | `seller-signup.html` | 판매자 회원가입 | S-AUTH-003~004 |
 | B | `seller-entry.html` | 입점 신청(서류 업로드) | S-ENTRY-001~002 |
@@ -61,10 +72,6 @@ frontend/
 | B | `seller-sales.html` | 매출/정산 | S-DASH-002~003 |
 | B | `seller-claims.html` | 교환/환불 관리 | S-CLAIM-001~003 |
 | B | `seller-qna.html` | Q&A 관리 | S-QA-001~003 |
-
-### 3순위 — 관리자 13개 (A-*), 먼저 끝낸 사람이 가져가기
-
-로그인·사용자·상품·입점·쿠폰·포인트·Q&A·정산 관리 페이지. 시간 남으면 진행.
 
 ## 3. 새 페이지 만드는 법 (3단계)
 
@@ -119,9 +126,9 @@ git push origin feature/buy-cart
 
 | 담당 | 예시 |
 |---|---|
-| 리더 | `feature/auth-login`, `feature/order-checkout`, `feature/order-history` |
-| 팀원 A | `feature/buy-product-detail`, `feature/buy-cart`, `feature/my-addresses` |
-| 팀원 B | `feature/seller-login`, `feature/seller-products`, `feature/seller-orders` |
+| 리더 | `feature/order-checkout`, `feature/order-history`, `feature/admin-products` |
+| 팀원 A | `feature/auth-signup`, `feature/buy-product-detail`, `feature/buy-cart` |
+| 팀원 B | `feature/auth-login`, `feature/seller-products`, `feature/seller-orders` |
 
 ## 5. 내 페이지 확인하는 법
 

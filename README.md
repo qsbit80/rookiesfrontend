@@ -58,6 +58,8 @@ frontend/
 | A | `product-detail.html` | 상품상세 | U-PROD-001~007 | `?id=상품번호` |
 | A | `cart.html` | 장바구니 | U-CART-001~003 | — |
 | A | `review-write.html` | 리뷰 작성 | U-REVIEW-001 | `?orderId=` |
+| A | `mypage.html` | 마이페이지 | U-HEAD-001 | — |
+| A | `wishlist.html` | 위시리스트 | U-HEAD-002 | — | 
 
 ### 팀원 B — 판매자 입점·상품·주문 축 (7페이지)
 
@@ -69,6 +71,8 @@ frontend/
 | B | `seller-products.html` | 내 상품 목록 | S-PROD-001, 005 |
 | B | `seller-product-form.html` | 상품 등록/수정 | S-PROD-002~004 |
 | B | `seller-orders.html` | 주문 관리 | S-ORDER-001~002 |
+| B | `shoppingcart.html` | 장바구니 | U-HEAD-003 |
+| B | `storeinfo.html` | 매장안내 페이지 | U-HEAD-004 | 
 
 ### 팀원 C — 계정·백오피스 조회/관리 축 (신규, 9페이지)
 

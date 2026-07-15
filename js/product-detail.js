@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // TODO: POST /api/v1/carts  body: { productId, size, quantity }
     if (confirm("장바구니에 담았습니다.\n장바구니로 이동할까요?")) {
-      location.href = "cart.html";
+      location.href = "shoppingcart.html";
     }
   });
 

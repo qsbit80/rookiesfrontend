@@ -45,7 +45,7 @@
           <path d="M12 20s-7-4.6-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.4 12 20 12 20Z"/>
         </svg>
       </a>
-      <a href="cart.html" data-auth-required aria-label="장바구니">
+      <a href="shoppingcart.html" data-auth-required aria-label="장바구니">
         <svg class="icn" viewBox="0 0 24 24">
           <path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z"/>
           <path d="M9 7a3 3 0 0 1 6 0"/>
@@ -88,6 +88,8 @@
     </ol>
 
     <form id="sellerEntryForm" class="entry-form" novalidate>
+      <!-- ===== 스텝 1: 정보 입력 ===== -->
+      <div class="entry-step" data-step="1">
       <section class="form-section" aria-labelledby="businessInfoTitle">
         <div class="form-section-head">
           <div>
@@ -161,6 +163,14 @@
         </div>
       </section>
 
+      <div class="form-actions">
+        <a class="button-secondary" href="index.html">취소</a>
+        <button type="button" class="button-primary" id="toStep2">다음</button>
+      </div>
+      </div><!-- /스텝 1 -->
+
+      <!-- ===== 스텝 2: 서류 제출 ===== -->
+      <div class="entry-step" data-step="2" hidden>
       <section class="form-section" aria-labelledby="documentTitle">
         <div class="form-section-head">
           <div>
@@ -207,12 +217,13 @@
         </label>
       </section>
 
-      <div class="form-message" id="formMessage" role="alert"></div>
-
       <div class="form-actions">
-        <a class="button-secondary" href="index.html">취소</a>
+        <button type="button" class="button-secondary" id="toStep1">이전</button>
         <button class="button-primary" id="submitButton" type="submit">입점 신청하기</button>
       </div>
+      </div><!-- /스텝 2 -->
+
+      <div class="form-message" id="formMessage" role="alert"></div>
     </form>
   </section>
 </main>
@@ -259,5 +270,6 @@
 
 <script src="js/common.js"></script>
 <script src="js/seller-entry.js"></script>
+<script src="js/seller-entry-steps.js"></script>
 </body>
 </html>

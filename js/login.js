@@ -70,13 +70,22 @@
         })
       });
 
-      if (!response.ok) {
-        let message = "아이디 또는 비밀번호를 확인해 주세요.";
-        try {
-          const data = await response.json();
-          message = data.message || message;
-        } catch (_) {}
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || result.success === false) {
+        const message = (result && result.message) || "아이디 또는 비밀번호를 확인해 주세요.";
         throw new Error(message);
+      }
+
+      // 로그인 성공: 발급된 JWT 토큰을 저장한다.
+      // 이후 모든 보호 API 요청은 이 토큰을 Authorization: Bearer 헤더로 실어 보낸다
+      // (js/auth.js의 전역 fetch 인터셉터가 자동으로 처리).
+      const tokenData = (result && result.data) || {};
+      if (tokenData.accessToken) {
+        localStorage.setItem("catchcatch.accessToken", tokenData.accessToken);
+      }
+      if (tokenData.refreshToken) {
+        localStorage.setItem("catchcatch.refreshToken", tokenData.refreshToken);
       }
 
       // 로그인 성공 상태 저장

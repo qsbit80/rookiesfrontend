@@ -12,8 +12,8 @@
 <!-- ================= 공통 헤더 시작 (수정 금지) ================= -->
 <div class="utility">
   <div class="wrap">
-    <a href="#">고객센터</a>
-    <a href="#">매장안내</a>
+    <a href="customercenter.html">고객센터</a>
+    <a href="storeinfo.html">매장안내</a>
     <a href="login.html" data-auth-guest>로그인</a>
     <a href="signup.html" data-auth-guest>회원가입</a>
     <a href="mypage.html" data-auth-member hidden>마이페이지</a>
@@ -29,18 +29,19 @@
         <input type="text" name="q" placeholder="찾으시는 상품이 있나요?" aria-label="상품 검색">
       </form>
     </div>
-    <a class="brand" href="main.html">캐치캐치</a>
+    <a class="brand" href="index.html">캐치캐치</a>
     <div class="head-right">
       <a href="mypage.html" id="mypageLink" aria-label="마이페이지"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></a>
       <a href="wishlist.html" aria-label="위시리스트"><svg class="icn" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.4 12 20 12 20Z"/></svg></a>
-      <a href="cart.html" aria-label="장바구니"><svg class="icn" viewBox="0 0 24 24"><path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></a>
+      <a href="shoppingcart.html" aria-label="장바구니"><svg class="icn" viewBox="0 0 24 24"><path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></a>
     </div>
   </div>
 </header>
 
 <nav class="cats">
   <div class="wrap">
-    <a href="product-list.html">베스트</a>
+    <a href="product-list.html">전체</a>
+    <a href="product-list.html?view=best">베스트</a>
     <a href="brand.html">브랜드</a>
     <a href="product-list.html?cat=outer">아우터</a>
     <a href="product-list.html?cat=top">상의</a>
@@ -171,19 +172,19 @@
         <label class="agree-item">
           <input type="checkbox" name="agreeTerms" data-agree-required>
           <span>[필수] 이용약관 동의</span>
-          <a href="#" class="agree-view">보기</a>
+          <a href="terms.html?type=user-terms" class="agree-view">보기</a>
         </label>
 
         <label class="agree-item">
           <input type="checkbox" name="agreePrivacy" data-agree-required>
           <span>[필수] 개인정보 수집·이용 동의</span>
-          <a href="#" class="agree-view">보기</a>
+          <a href="terms.html?type=privacy" class="agree-view">보기</a>
         </label>
 
         <label class="agree-item">
           <input type="checkbox" name="agreeMarketing">
           <span>[선택] 마케팅 정보 수신 동의</span>
-          <a href="#" class="agree-view">보기</a>
+          <a href="terms.html?type=marketing" class="agree-view">보기</a>
         </label>
       </fieldset>
 
@@ -236,7 +237,7 @@
       <div class="signup-complete">
         <h4>가입이 완료되었습니다!</h4>
         <p>캐치캐치의 회원이 되신 것을 환영합니다.</p>
-        <a href="main.html" class="btn-submit" style="display:inline-block;text-decoration:none;line-height:52px;padding:0 40px;">홈으로 가기</a>
+        <a href="index.html" class="btn-submit" style="display:inline-block;text-decoration:none;line-height:52px;padding:0 40px;">홈으로 가기</a>
       </div>
     </div>
 
@@ -250,7 +251,7 @@
   <div class="wrap">
     <div class="foot-top">
       <div class="foot-brand">
-        <div class="brand">캐치캐치</div>
+    <a class="brand" href="index.html" aria-label="캐치캐치 메인 페이지">캐치캐치</a>
         <p>예쁜 옷 많이 캐치캐치</p>
       </div>
       <div class="foot-col">
@@ -260,11 +261,11 @@
       </div>
       <div class="foot-col">
         <h5>Customer</h5>
-        <a href="#">공지사항</a><a href="faq.html">자주 묻는 질문</a><a href="#">1:1 문의</a><a href="#">배송/반품</a>
+        <a href="notice.html">공지사항</a><a href="customercenter.html?tab=faq">자주 묻는 질문</a><a href="customercenter.html?tab=inquiry">1:1 문의</a><a href="customercenter.html?tab=guide">배송/반품</a>
       </div>
       <div class="foot-col">
         <h5>About</h5>
-        <a href="#">브랜드 스토리</a><a href="#">매장 안내</a><a href="#">채용</a><a href="#">제휴 문의</a>
+        <a href="brand.html">브랜드 스토리</a><a href="storeinfo.html">매장 안내</a><a href="careers.html">채용</a><a href="partnership.html">제휴 문의</a>
       </div>
     </div>
     <div class="foot-bar">
@@ -284,5 +285,6 @@
      최소 동작만 넣은 임시(mock) 스크립트입니다. -->
 <script src="js/auth.js"></script>
 <script src="js/signup.js"></script>
+<script src="js/navigation.js"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@
         수정 필요하면 리더에게 요청.
      4. 페이지 전용 CSS가 필요하면 css/페이지명.css 를 만들어
         아래 <link> 자리처럼 추가하세요. css/common.css 는 수정 금지!
-     ※ 메인 페이지는 main.html 입니다. (index.html 아님)
+     ※ 메인 페이지는 index.html 입니다.
      ※ 관리자 페이지는 _admin-template.html 을 쓰세요.
      ============================================================ -->
 <head>
@@ -23,14 +23,14 @@
 </head>
 <body>
 
-<!-- 상품 카드를 쓰는 페이지라면 main.html 상단의
+<!-- 상품 카드를 쓰는 페이지라면 index.html 상단의
      SVG 실루엣 <defs> 블록을 여기에 복사하세요. -->
 
 <!-- ================= 공통 헤더 시작 (수정 금지) ================= -->
 <div class="utility">
   <div class="wrap">
-    <a href="#">고객센터</a>
-    <a href="#">매장안내</a>
+    <a href="customercenter.html">고객센터</a>
+    <a href="storeinfo.html">매장안내</a>
     <a href="login.html" data-auth-guest>로그인</a>
     <a href="signup.html" data-auth-guest>회원가입</a>
     <a href="mypage.html" data-auth-member hidden>마이페이지</a>
@@ -41,34 +41,35 @@
 <header class="site">
   <div class="wrap head-row">
     <div class="head-left">
-      <label class="search">
+      <form class="search" action="search.html" method="get" role="search">
         <svg class="icn" viewBox="0 0 24 24" style="width:15px;height:15px"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-        찾으시는 상품이 있나요?
-      </label>
+        <input type="text" name="q" placeholder="찾으시는 상품이 있나요?" aria-label="상품 검색">
+      </form>
     </div>
-    <div class="brand">캐치캐치</div>
+    <a class="brand" href="index.html" aria-label="캐치캐치 메인 페이지">캐치캐치</a>
     <div class="head-right">
       <a href="mypage.html" id="mypageLink" aria-label="마이페이지"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></a>
-      <a href="#" aria-label="위시리스트"><svg class="icn" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.4 12 20 12 20Z"/></svg></a>
-      <a href="#" aria-label="장바구니"><svg class="icn" viewBox="0 0 24 24"><path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></a>
+      <a href="wishlist.html" aria-label="위시리스트"><svg class="icn" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.4 12 20 12 20Z"/></svg></a>
+      <a href="shoppingcart.html" aria-label="장바구니"><svg class="icn" viewBox="0 0 24 24"><path d="M6 7h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></a>
     </div>
   </div>
 </header>
 
 <nav class="cats">
   <div class="wrap">
-    <a href="#" class="on">베스트</a>
+    <a href="product-list.html">전체</a>
+    <a href="product-list.html?view=best">베스트</a>
     <a href="brand.html">브랜드</a>
-    <a href="#">아우터</a>
-    <a href="#">상의</a>
-    <a href="#">셔츠</a>
-    <a href="#">니트</a>
-    <a href="#">팬츠</a>
-    <a href="#">데님</a>
-    <a href="#">신발</a>
-    <a href="#">가방</a>
-    <a href="#">액세서리</a>
-    <a href="#">언더웨어</a>
+    <a href="product-list.html?cat=outer">아우터</a>
+    <a href="product-list.html?cat=top">상의</a>
+    <a href="product-list.html?cat=shirts">셔츠</a>
+    <a href="product-list.html?cat=knit">니트</a>
+    <a href="product-list.html?cat=pants">팬츠</a>
+    <a href="product-list.html?cat=denim">데님</a>
+    <a href="product-list.html?cat=shoes">신발</a>
+    <a href="product-list.html?cat=bag">가방</a>
+    <a href="product-list.html?cat=acc">액세서리</a>
+    <a href="product-list.html?cat=underwear">언더웨어</a>
   </div>
 </nav>
 <!-- ================= 공통 헤더 끝 ================= -->
@@ -85,6 +86,7 @@
     <p class="kicker">Claim Management</p>
     <h3>교환 / 환불 관리</h3>
   </div>
+  <a class="seller-dashboard-link" href="seller-dashboard.html">← 대시보드</a>
 </div>
 
 
@@ -96,14 +98,14 @@
 
     <div class="input-group">
       <label>조회 기간</label>
-      <input type="date">
+      <input type="date" id="claimStartDate">
     </div>
 
     <span class="wave">~</span>
 
     <div class="input-group">
       <label>&nbsp;</label>
-      <input type="date">
+      <input type="date" id="claimEndDate">
     </div>
 
 
@@ -111,24 +113,26 @@
 
       <label>상태</label>
 
-      <select>
-        <option>전체</option>
-        <option>접수</option>
-        <option>검토중</option>
-        <option>승인</option>
-        <option>반려</option>
-        <option>완료</option>
+      <select id="claimStatusFilter">
+        <option value="all">전체</option>
+        <option value="접수">접수</option>
+        <option value="검토중">검토중</option>
+        <option value="승인">승인</option>
+        <option value="반려">반려</option>
+        <option value="완료">완료</option>
       </select>
 
     </div>
 
 
-    <button class="btn-search">
+    <button type="button" class="btn-search" id="claimSearchButton">
       조회
     </button>
 
 
   </div>
+
+  <p class="filter-message" id="claimFilterMessage" aria-live="polite"></p>
 
 </div>
 
@@ -171,7 +175,7 @@
 <tbody>
 
 
-<tr class="claim-item active">
+<tr class="claim-item active" data-id="C001" data-product="와이드 데님 팬츠" data-type="교환" data-reason="사이즈 변경" data-amount="45,000원" data-status="검토중" data-date="2026-07-14">
 
 <td>C001</td>
 <td>와이드 데님</td>
@@ -186,7 +190,7 @@
 
 
 
-<tr class="claim-item">
+<tr class="claim-item" data-id="C002" data-product="오버핏 셔츠" data-type="환불" data-reason="상품 불량" data-amount="32,000원" data-status="접수" data-date="2026-07-13">
 
 <td>C002</td>
 <td>오버핏 셔츠</td>
@@ -201,7 +205,7 @@
 
 
 
-<tr class="claim-item">
+<tr class="claim-item" data-id="C003" data-product="코튼 니트" data-type="환불" data-reason="단순 변심" data-amount="29,000원" data-status="완료" data-date="2026-07-10">
 
 <td>C003</td>
 <td>코튼 니트</td>
@@ -245,7 +249,7 @@
 
 <label>요청번호</label>
 
-<p>C001</p>
+<p id="claimId">C001</p>
 
 </div>
 
@@ -254,7 +258,7 @@
 
 <label>상품명</label>
 
-<p>와이드 데님 팬츠</p>
+<p id="claimProduct">와이드 데님 팬츠</p>
 
 </div>
 
@@ -264,7 +268,7 @@
 
 <label>요청 유형</label>
 
-<p>교환</p>
+<p id="claimType">교환</p>
 
 </div>
 
@@ -274,7 +278,7 @@
 
 <label>요청 사유</label>
 
-<p>사이즈 변경</p>
+<p id="claimReason">사이즈 변경</p>
 
 </div>
 
@@ -284,7 +288,7 @@
 
 <label>환불 금액</label>
 
-<p>45,000원</p>
+<p id="claimAmount">45,000원</p>
 
 </div>
 
@@ -309,7 +313,11 @@
 <div class="action-row">
 
 
-<select>
+<select id="claimStatusSelect">
+
+<option>
+접수
+</option>
 
 <option>
 검토중
@@ -323,10 +331,14 @@
 반려
 </option>
 
+<option>
+완료
+</option>
+
 </select>
 
 
-<button class="btn-primary">
+<button type="button" class="btn-primary" id="updateClaimStatusButton">
 상태 변경
 </button>
 
@@ -373,7 +385,7 @@
 
 
 
-<button class="btn-danger">
+<button type="button" class="btn-danger" id="completeRefundButton">
 
 환불 완료 처리
 
@@ -410,15 +422,15 @@
       </div>
       <div class="foot-col">
         <h5>Shop</h5>
-        <a href="#">베스트</a><a href="#">아우터</a>
+        <a href="product-list.html?view=best">베스트</a><a href="product-list.html?cat=outer">아우터</a>
       </div>
       <div class="foot-col">
         <h5>Customer</h5>
-        <a href="#">공지사항</a><a href="#">자주 묻는 질문</a><a href="#">1:1 문의</a><a href="#">배송/반품</a>
+        <a href="notice.html">공지사항</a><a href="customercenter.html?tab=faq">자주 묻는 질문</a><a href="customercenter.html?tab=inquiry">1:1 문의</a><a href="customercenter.html?tab=guide">배송/반품</a>
       </div>
       <div class="foot-col">
         <h5>About</h5>
-        <a href="#">브랜드 스토리</a><a href="#">매장 안내</a><a href="#">채용</a><a href="#">제휴 문의</a>
+        <a href="brand.html">브랜드 스토리</a><a href="storeinfo.html">매장 안내</a><a href="careers.html">채용</a><a href="partnership.html">제휴 문의</a>
       </div>
     </div>
     <div class="foot-bar">
@@ -435,5 +447,7 @@
 
 <!-- 페이지 전용 스크립트가 있으면 여기에 추가 -->
 <script src="js/auth.js"></script>
+<script src="js/seller-claims.js"></script>
+<script src="js/navigation.js"></script>
 </body>
 </html>

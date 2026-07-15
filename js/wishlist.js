@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // TODO: POST /api/v1/carts  body: { productId, quantity: 1 }
       //   ⚠️ 사이즈 옵션이 필요하면 상품상세로 보내는 게 정확함
       if (confirm(`'${item.name}'을(를) 장바구니에 담았습니다.\n장바구니로 이동할까요?`)) {
-        location.href = "cart.html";
+        location.href = "shoppingcart.html";
       }
     }
   });
@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // TODO: POST /api/v1/carts 를 선택 개수만큼 호출
     if (confirm(`${checked.length}개 상품을 장바구니에 담았습니다.\n장바구니로 이동할까요?`)) {
-      location.href = "cart.html";
+      location.href = "shoppingcart.html";
     }
   });
 

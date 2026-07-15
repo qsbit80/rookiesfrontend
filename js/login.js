@@ -60,14 +60,19 @@
     if (!username.value.trim() || !password.value) return;
 
     try {
+      // 백엔드 요청 필드가 다르다:
+      //  - 일반 사용자 로그인: { username, password }
+      //  - 판매자 로그인(/auth/seller/login): { loginId, password }
+      const idValue = username.value.trim();
+      const payload = loginType.value === "seller"
+        ? { loginId: idValue, password: password.value }
+        : { username: idValue, password: password.value };
+
       const response = await fetch(apiMap[loginType.value], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          username: username.value.trim(),
-          password: password.value
-        })
+        body: JSON.stringify(payload)
       });
 
       const result = await response.json().catch(() => null);

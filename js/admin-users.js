@@ -17,12 +17,30 @@
   function mapUser(u) {
     return {
       id: u.userId,
+      username: u.username,
       name: u.name,
       email: u.email,
       role: u.role,
+      point: u.point,
+      deleted: u.deleted,
       status: u.suspended ? "stop" : "ok",
       joined: (u.createdAt || "").slice(0, 10),
+      createdAt: u.createdAt,
     };
+  }
+
+  // 상세 모달 — 목록 API가 이미 준 정보만 표시 (백엔드 추가 호출 없음)
+  function showDetail(user) {
+    AdminUI.detail("사용자 상세", [
+      ["사용자 ID", user.id],
+      ["아이디", user.username],
+      ["이름", user.name],
+      ["이메일", user.email],
+      ["권한", ROLE[user.role] || user.role],
+      ["보유 포인트", `${AdminUI.num(user.point || 0)} P`],
+      ["계정 상태", user.deleted ? "탈퇴" : STATUS[user.status]],
+      ["가입일시", (user.createdAt || "-").replace("T", " ").slice(0, 19)],
+    ]);
   }
 
   function render(list, total = list.length) {
@@ -81,7 +99,7 @@
     if (!user) return;
 
     if (btn.dataset.act === "detail") {
-      AdminUI.toast(`${user.name} (${user.id}) — 상세 API 연동 예정`);
+      showDetail(user);
       return;
     }
 
@@ -107,7 +125,8 @@
   async function load() {
     try {
       const data = await AdminApi.list("/users?size=200");
-      USERS = data.map(mapUser);
+      // 관리자(ADMIN) 계정은 사용자 관리 목록에서 제외한다.
+      USERS = data.filter((u) => u.role !== "ADMIN").map(mapUser);
       applyFilter();
     } catch (err) {
       rowsEl.innerHTML = `<tr class="empty-row"><td colspan="8">${AdminUI.escape(err.message || "목록을 불러오지 못했습니다.")}</td></tr>`;

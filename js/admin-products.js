@@ -12,7 +12,15 @@
   let PRODUCTS = [];
 
   function mapRow(p) {
-    return { id: p.productId, name: p.name, price: p.finalPrice ?? p.price };
+    return {
+      id: p.productId,
+      name: p.name,
+      price: p.finalPrice ?? p.price,
+      basePrice: p.price,
+      discountRate: p.discountRate ?? 0,
+      finalPrice: p.finalPrice ?? p.price,
+      thumbnailUrl: p.thumbnailUrl,
+    };
   }
 
   function render(list, total = list.length) {
@@ -65,7 +73,17 @@
     if (!p) return;
     const act = btn.dataset.act;
 
-    if (act === "detail") { AdminUI.toast(`${p.name} 상세 — 상품 상세 연동 예정`); return; }
+    if (act === "detail") {
+      AdminUI.detail("상품 상세", [
+        ["상품 ID", p.id],
+        ["상품명", p.name],
+        ["정상가", AdminUI.won(p.basePrice)],
+        ["할인율", `${p.discountRate}%`],
+        ["판매가", AdminUI.won(p.finalPrice)],
+        ["썸네일", p.thumbnailUrl || "(없음)"],
+      ]);
+      return;
+    }
 
     if (act === "delete") {
       const ok = await AdminUI.confirm({

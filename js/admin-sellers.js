@@ -1,0 +1,104 @@
+/* 관리자 - 입점 업체 목록/상태변경
+   GET /admin/sellers,  PUT /admin/sellers/{sellerId}/status  {status}
+   ※ 등록 상품 수는 백엔드 미제공이라 '-' 표기. */
+(function () {
+  "use strict";
+
+  const STATUS = { ok: "정상", wait: "일시정지", stop: "폐점" };
+  const FROM_ENUM = { ACTIVE: "ok", SUSPENDED: "wait", CLOSED: "stop", FORCED_CLOSED: "stop" };
+  const TO_ENUM = { ok: "ACTIVE", wait: "SUSPENDED", stop: "FORCED_CLOSED" };
+
+  const rowsEl = document.getElementById("rows");
+  const countEl = document.getElementById("count");
+  const qEl = document.getElementById("q");
+  const statusEl = document.getElementById("statusFilter");
+
+  let SELLERS = [];
+
+  function mapRow(s) {
+    return {
+      id: s.sellerId,
+      company: s.businessName,
+      ceo: s.representativeName,
+      joined: (s.createdAt || "").slice(0, 10),
+      status: FROM_ENUM[s.status] || "ok",
+    };
+  }
+
+  function render(list, total = list.length) {
+    if (!list.length) {
+      rowsEl.innerHTML = '<tr class="empty-row"><td colspan="7">조건에 맞는 업체가 없습니다.</td></tr>';
+      countEl.textContent = 0;
+      return;
+    }
+    rowsEl.innerHTML = list.map((s) => `
+      <tr data-id="${AdminUI.escape(s.id)}">
+        <td class="num">${AdminUI.escape(s.id)}</td>
+        <td class="strong">${AdminUI.escape(s.company)}</td>
+        <td>${AdminUI.escape(s.ceo)}</td>
+        <td class="num muted">-</td>
+        <td class="muted">${AdminUI.escape(s.joined)}</td>
+        <td><span class="tag ${s.status}">${STATUS[s.status]}</span></td>
+        <td><button class="btn sm" data-act="change">상태 변경</button></td>
+      </tr>`).join("");
+    countEl.textContent = total;
+  }
+
+  const listController = AdminUI.createListController({ pager: document.querySelector(".pager"), render });
+
+  function applyFilter() {
+    const q = qEl.value.trim().toLowerCase();
+    const status = statusEl ? statusEl.value : "";
+    listController.setItems(SELLERS.filter((s) =>
+      (!status || s.status === status) &&
+      (!q || s.company.toLowerCase().includes(q) || s.ceo.toLowerCase().includes(q) || String(s.id).toLowerCase().includes(q))
+    ));
+  }
+  qEl.addEventListener("input", applyFilter);
+  if (statusEl) statusEl.addEventListener("change", applyFilter);
+
+  rowsEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest('button[data-act="change"]');
+    if (!btn) return;
+    const id = btn.closest("tr").dataset.id;
+    const s = SELLERS.find((x) => String(x.id) === String(id));
+    if (!s) return;
+
+    const res = await AdminUI.form({
+      title: `${s.company} 상태 변경`,
+      message: "변경할 운영 상태를 선택하세요.",
+      okText: "변경",
+      fields: [{
+        name: "status", label: "운영 상태", type: "select", value: s.status,
+        options: [
+          { value: "ok", label: "정상" },
+          { value: "wait", label: "일시정지" },
+          { value: "stop", label: "강제폐점" },
+        ],
+      }],
+    });
+    if (!res) return;
+    const enumStatus = TO_ENUM[res.status];
+    try {
+      await AdminApi.put(`/sellers/${s.id}/status`, { status: enumStatus });
+      s.status = res.status;
+      applyFilter();
+      AdminUI.toast(`상태가 '${STATUS[res.status]}'(으)로 변경되었습니다.`);
+    } catch (err) {
+      AdminUI.toast(err.message || "상태 변경에 실패했습니다.");
+    }
+  });
+
+  async function load() {
+    try {
+      const data = await AdminApi.list("/sellers");
+      SELLERS = data.map(mapRow);
+      applyFilter();
+    } catch (err) {
+      rowsEl.innerHTML = `<tr class="empty-row"><td colspan="7">${AdminUI.escape(err.message || "목록을 불러오지 못했습니다.")}</td></tr>`;
+      countEl.textContent = 0;
+    }
+  }
+
+  load();
+})();

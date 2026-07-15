@@ -49,22 +49,22 @@
     <section class="metric-grid" aria-label="주요 운영 지표">
       <article class="metric-card">
         <p>사용자 관리</p>
-        <strong class="tnum">—</strong>
+        <strong class="tnum" id="mUsers">—</strong>
         <span>사용자 상태·권한 및 포인트 현황</span>
       </article>
       <article class="metric-card metric-card--alert">
         <p>상품 운영</p>
-        <strong class="tnum">—</strong>
+        <strong class="tnum" id="mProducts">—</strong>
         <span>전체 상품 조회 및 제재 대상 확인</span>
       </article>
       <article class="metric-card">
         <p>입점·쿠폰 요청</p>
-        <strong class="tnum">—</strong>
+        <strong class="tnum" id="mRequests">—</strong>
         <span>승인 및 반려 처리 대기 건</span>
       </article>
       <article class="metric-card">
         <p>고객 문의</p>
-        <strong class="tnum">—</strong>
+        <strong class="tnum" id="mQna">—</strong>
         <span>플랫폼 전체 Q&amp;A 모니터링</span>
       </article>
     </section>
@@ -122,5 +122,8 @@
       <a href="#work-queue">우선 처리 업무 보기</a>
     </section>
   </main>
+  <script src="js/admin-ui.js?v=3"></script>
+  <script src="js/admin-api.js"></script>
+  <script src="js/admin-dashboard.js"></script>
 </body>
 </html>

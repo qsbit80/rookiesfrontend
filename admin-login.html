@@ -19,10 +19,14 @@
       <div class="admin-login-heading">
         <p class="eyebrow">RESTRICTED ACCESS</p>
         <h1 id="admin-login-title">관리자 로그인</h1>
-        <p>등록된 관리자 비밀번호를 입력해 주세요.</p>
+        <p>등록된 관리자 아이디와 비밀번호를 입력해 주세요.</p>
       </div>
 
       <form id="adminLoginForm" novalidate>
+        <div class="admin-field">
+          <label for="adminUsername">관리자 아이디</label>
+          <input id="adminUsername" name="username" type="text" autocomplete="username" required minlength="1" placeholder="아이디 입력">
+        </div>
         <div class="admin-field">
           <label for="adminPassword">관리자 비밀번호</label>
           <div class="password-control">

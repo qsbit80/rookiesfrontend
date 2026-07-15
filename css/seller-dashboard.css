@@ -80,6 +80,12 @@
     font-size:13px;
 }
 
+.dashboard-message{
+    margin:14px 0 0;
+    color:var(--mid);
+    font-size:13px;
+}
+
 
 /* ===========================
    쿠폰 발행 요청

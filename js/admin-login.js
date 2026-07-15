@@ -1,8 +1,8 @@
 /*
- * 서버 계약: POST /api/v1/auth/admin/login
- * 요청 본문: { password: string }
- * 성공 응답: { accessToken: string } 또는 { data: { accessToken: string } }
- * 해당 API는 서버에서 DB의 관리자 계정과 권한을 검증한 뒤에만 토큰을 발급해야 한다.
+ * 서버 계약: POST /api/v1/admin/users
+ * 요청 본문: { username: string, password: string }  (백엔드 LoginRequest, 둘 다 필수)
+ * 성공 응답: { data: { accessToken: string, ... } }
+ * 서버가 DB의 관리자 계정(role=ADMIN)과 비밀번호를 검증한 뒤에만 토큰을 발급한다.
  */
 (function () {
   "use strict";
@@ -34,6 +34,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("adminLoginForm");
+    const username = document.getElementById("adminUsername");
     const password = document.getElementById("adminPassword");
     const submit = document.getElementById("loginSubmit");
     const message = document.getElementById("loginMessage");
@@ -66,9 +67,15 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      const usernameValue = username.value.trim();
       const value = password.value;
       showMessage("");
 
+      if (!usernameValue) {
+        showMessage("관리자 아이디를 입력해 주세요.");
+        username.focus();
+        return;
+      }
       if (!value) {
         showMessage("관리자 비밀번호를 입력해 주세요.");
         password.focus();
@@ -83,7 +90,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ password: value }),
+          body: JSON.stringify({ username: usernameValue, password: value }),
         });
         const payload = await response.json().catch(() => null);
         const token = tokenFrom(payload);

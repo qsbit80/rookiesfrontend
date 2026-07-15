@@ -11,7 +11,7 @@
         수정 필요하면 리더에게 요청.
      4. 페이지 전용 CSS가 필요하면 css/페이지명.css 를 만들어
         아래 <link> 자리처럼 추가하세요. css/common.css 는 수정 금지!
-     ※ 메인 페이지는 main.html 입니다. (index.html 아님)
+     ※ 메인 페이지는 index.html 입니다.
      ※ 관리자 페이지는 _admin-template.html 을 쓰세요.
      ============================================================ -->
 <head>
@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<!-- 상품 카드를 쓰는 페이지라면 main.html 상단의
+<!-- 상품 카드를 쓰는 페이지라면 index.html 상단의
      SVG 실루엣 <defs> 블록을 여기에 복사하세요. -->
 
 <!-- ================= 공통 헤더 시작 (수정 금지) ================= -->
@@ -31,8 +31,10 @@
   <div class="wrap">
     <a href="#">고객센터</a>
     <a href="#">매장안내</a>
-    <a href="mypage.html">마이페이지</a>
-    <a href="#">로그아웃</a>
+    <a href="login.html" data-auth-guest>로그인</a>
+    <a href="signup.html" data-auth-guest>회원가입</a>
+    <a href="mypage.html" data-auth-member hidden>마이페이지</a>
+    <a href="#" data-auth-member data-logout hidden>로그아웃</a>
   </div>
 </div>
 
@@ -44,7 +46,7 @@
         찾으시는 상품이 있나요?
       </label>
     </div>
-    <div class="brand">캐치캐치</div>
+    <a class="brand" href="index.html" aria-label="캐치캐치 메인 페이지">캐치캐치</a>
     <div class="head-right">
       <a href="mypage.html" id="mypageLink" aria-label="마이페이지"><svg class="icn" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg></a>
       <a href="#" aria-label="위시리스트"><svg class="icn" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.4 12 20 12 20Z"/></svg></a>
@@ -76,6 +78,7 @@
   <!-- ▼▼▼ 여기부터 페이지 내용을 작성하세요 ▼▼▼ -->
 
 <section class="block">
+
   <div class="sec-head">
     <div>
       <p class="kicker">My Page</p>
@@ -83,137 +86,485 @@
     </div>
   </div>
 
+
+
   <!-- 탭 -->
   <div class="tabs">
-    <button class="tab-btn active" data-tab="list">배송지 조회</button>
-    <button class="tab-btn" data-tab="add">신규 등록</button>
-    <button class="tab-btn" data-tab="edit">배송지 수정</button>
+
+    <button class="tab-btn active" data-tab="list">
+      배송지 조회
+    </button>
+
+    <button class="tab-btn" data-tab="add">
+      신규 등록
+    </button>
+
   </div>
 
-  <!-- 배송지 조회 -->
+
+
+
+  <!-- =========================
+       배송지 조회
+  ========================== -->
+
   <div class="tab-content active" id="list">
+
+
     <table class="table">
+
       <thead>
+
         <tr>
           <th>구분</th>
           <th>받는 사람</th>
           <th>주소</th>
           <th>연락처</th>
           <th>기본배송지</th>
+          <th>관리</th>
         </tr>
+
       </thead>
+
+
+
       <tbody>
+
+
         <tr>
+
           <td>집</td>
+
           <td>홍길동</td>
-          <td>서울특별시 성동구 왕십리로 100</td>
-          <td>010-1234-5678</td>
-          <td>✔</td>
+
+          <td>
+            서울특별시 성동구 왕십리로 100
+          </td>
+
+          <td>
+            010-1234-5678
+          </td>
+
+
+          <td>
+
+            <input
+              type="checkbox"
+              class="default-address"
+              checked
+              onchange="changeDefault(this)">
+
+          </td>
+
+
+          <td>
+
+            <button
+              class="btn-outline"
+              onclick="showEdit(
+              '집',
+              '홍길동',
+              '010-1234-5678',
+              '서울특별시 성동구 왕십리로 100',
+              '101동 1001호',
+              true)">
+              수정
+            </button>
+
+          </td>
+
+
         </tr>
+
+
+
+
         <tr>
+
           <td>회사</td>
+
           <td>홍길동</td>
-          <td>서울특별시 강남구 테헤란로 100</td>
-          <td>010-1234-5678</td>
-          <td>-</td>
+
+          <td>
+            서울특별시 강남구 테헤란로 100
+          </td>
+
+          <td>
+            010-1234-5678
+          </td>
+
+
+          <td>
+
+            <input
+              type="checkbox"
+              class="default-address"
+              onchange="changeDefault(this)">
+
+          </td>
+
+
+          <td>
+
+            <button
+              class="btn-outline"
+              onclick="showEdit(
+              '회사',
+              '홍길동',
+              '010-1234-5678',
+              '서울특별시 강남구 테헤란로 100',
+              '5층',
+              false)">
+              수정
+            </button>
+
+          </td>
+
+
         </tr>
+
+
       </tbody>
+
+
     </table>
+
+
+
+
+
+    <!-- =========================
+         배송지 수정 영역
+    ========================== -->
+
+
+    <div id="edit-area" class="edit-box">
+
+
+      <div class="edit-title">
+
+        <h4>배송지 수정</h4>
+
+      </div>
+
+
+
+
+      <form class="form-grid">
+
+
+        <label>
+
+          배송지명
+
+          <input id="editName" type="text">
+
+        </label>
+
+
+
+        <label>
+
+          받는 사람
+
+          <input id="editReceiver" type="text">
+
+        </label>
+
+
+
+        <label>
+
+          연락처
+
+          <input id="editPhone" type="text">
+
+        </label>
+
+
+
+
+        <label class="full">
+
+          주소
+
+
+          <div class="addr-row">
+
+
+            <input id="editAddr" type="text">
+
+
+            <button
+              type="button"
+              class="btn-outline"
+              onclick="openAddress('edit')">
+
+              주소 검색
+
+            </button>
+
+
+          </div>
+
+
+        </label>
+
+
+
+
+        <label class="full">
+
+          상세주소
+
+          <input id="editDetail" type="text">
+
+        </label>
+
+
+
+
+        <label class="check full">
+
+          <input 
+            id="editDefault"
+            type="checkbox">
+
+          기본 배송지로 설정
+
+        </label>
+
+
+
+        <div class="full btn-area">
+
+
+          <button class="btn-primary">
+
+            수정 완료
+
+          </button>
+
+
+        </div>
+
+
+
+      </form>
+
+
+    </div>
+
+
+
   </div>
 
-  <!-- 신규 등록 -->
+
+
+
+
+
+
+  <!-- =========================
+       신규 등록
+  ========================== -->
+
+
   <div class="tab-content" id="add">
+
+
     <form class="form-grid">
 
+
       <label>
+
         배송지명
-        <input type="text" placeholder="예) 집">
+
+        <input
+          type="text"
+          placeholder="예) 집">
+
       </label>
 
+
+
+
       <label>
+
         받는 사람
+
         <input type="text">
+
       </label>
+
+
+
 
       <label>
+
         연락처
-        <input type="text" placeholder="010-0000-0000">
+
+        <input
+          type="text"
+          placeholder="010-0000-0000">
+
       </label>
 
+
+
+
       <label class="full">
+
         주소
+
+
         <div class="addr-row">
-          <input type="text" placeholder="주소">
-          <button type="button" class="btn-outline">주소 검색</button>
+
+
+          <input
+            id="addAddr"
+            type="text"
+            placeholder="주소">
+
+
+          <button
+            type="button"
+            class="btn-outline"
+            onclick="openAddress('add')">
+
+            주소 검색
+
+          </button>
+
+
         </div>
+
+
       </label>
 
+
+
+
       <label class="full">
+
         상세주소
+
         <input type="text">
+
       </label>
+
+
+
 
       <label class="check full">
-        <input type="checkbox">
+
+
+        <input
+          id="addDefault"
+          type="checkbox">
+
+
         기본 배송지로 설정
+
+
       </label>
+
+
+
 
       <div class="full btn-area">
-        <button class="btn-primary">등록하기</button>
+
+
+        <button class="btn-primary">
+
+          등록하기
+
+        </button>
+
+
       </div>
 
+
     </form>
+
+
   </div>
 
-  <!-- 배송지 수정 -->
-  <div class="tab-content" id="edit">
-    <form class="form-grid">
 
-      <label>
-        수정할 배송지
-        <select>
-          <option>집</option>
-          <option>회사</option>
-        </select>
-      </label>
 
-      <label>
-        받는 사람
-        <input type="text" value="홍길동">
-      </label>
 
-      <label>
-        연락처
-        <input type="text" value="010-1234-5678">
-      </label>
 
-      <label class="full">
-        주소
-        <div class="addr-row">
-          <input type="text" value="서울특별시 성동구 왕십리로 100">
-          <button type="button" class="btn-outline">주소 검색</button>
-        </div>
-      </label>
 
-      <label class="full">
-        상세주소
-        <input type="text" value="101동 1001호">
-      </label>
 
-      <label class="check full">
-        <input type="checkbox" checked>
-        기본 배송지로 설정
-      </label>
+  <!-- =========================
+       주소 검색 팝업
+  ========================== -->
 
-      <div class="full btn-area">
-        <button class="btn-primary">수정하기</button>
+
+  <div id="address-modal" class="address-modal">
+
+
+    <div class="address-box">
+
+
+      <h4>
+        도로명 주소 검색
+      </h4>
+
+
+
+      <div class="address-search">
+
+
+        <input
+          id="address-keyword"
+          type="text"
+          placeholder="도로명, 건물명 입력">
+
+
+        <button
+          type="button"
+          class="btn-primary"
+          onclick="findAddress()">
+
+          검색
+
+        </button>
+
+
       </div>
 
-    </form>
+
+
+
+      <div id="address-result"
+           class="address-result">
+
+        검색 결과가 표시됩니다.
+
+      </div>
+
+
+
+
+      <button
+        type="button"
+        class="btn-outline close-btn"
+        onclick="closeAddress()">
+
+        닫기
+
+      </button>
+
+
+    </div>
+
+
   </div>
+
+
 
 </section>
-
   <!-- ▲▲▲ 여기까지 ▲▲▲ -->
 
 </main>
@@ -252,19 +603,465 @@
 <!-- ================= 공통 푸터 끝 ================= -->
 
 <!-- 페이지 전용 스크립트가 있으면 여기에 추가 -->
+<script src="js/auth.js"></script>
 <script>
-const tabs=document.querySelectorAll(".tab-btn");
-const contents=document.querySelectorAll(".tab-content");
 
-tabs.forEach(tab=>{
-    tab.addEventListener("click",()=>{
-        tabs.forEach(t=>t.classList.remove("active"));
-        contents.forEach(c=>c.classList.remove("active"));
 
-        tab.classList.add("active");
-        document.getElementById(tab.dataset.tab).classList.add("active");
+/* =========================
+   탭 전환
+========================= */
+
+document.querySelectorAll(".tab-btn")
+.forEach(btn => {
+
+    btn.addEventListener("click", function(){
+
+
+        document.querySelectorAll(".tab-btn")
+        .forEach(tab=>{
+
+            tab.classList.remove("active");
+
+        });
+
+
+        this.classList.add("active");
+
+
+
+        document.querySelectorAll(".tab-content")
+        .forEach(content=>{
+
+            content.classList.remove("active");
+
+        });
+
+
+
+        const target = this.dataset.tab;
+
+
+        document
+        .getElementById(target)
+        .classList.add("active");
+
+
+
+        // 신규 등록 이동 시 수정 영역 숨김
+
+        if(target === "add"){
+
+            document.getElementById("edit-area")
+            .style.display="none";
+
+        }
+
+
     });
+
 });
+
+
+
+
+
+
+
+/* =========================
+   배송지 수정 화면 표시
+========================= */
+
+function showEdit(
+    name,
+    receiver,
+    phone,
+    addr,
+    detail,
+    isDefault
+){
+
+
+    const editArea =
+        document.getElementById("edit-area");
+
+
+
+    editArea.style.display="block";
+
+
+
+    document.getElementById("editName").value =
+        name;
+
+
+    document.getElementById("editReceiver").value =
+        receiver;
+
+
+    document.getElementById("editPhone").value =
+        phone;
+
+
+    document.getElementById("editAddr").value =
+        addr;
+
+
+    document.getElementById("editDetail").value =
+        detail;
+
+
+    document.getElementById("editDefault").checked =
+        isDefault;
+
+
+
+
+
+    setTimeout(()=>{
+
+
+        editArea.scrollIntoView({
+
+            behavior:"smooth",
+
+            block:"start"
+
+        });
+
+
+    },100);
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+   기본 배송지 변경
+========================= */
+
+function changeDefault(target){
+
+
+    const checkboxes =
+        document.querySelectorAll(".default-address");
+
+
+
+    checkboxes.forEach(box=>{
+
+
+        if(box !== target){
+
+            box.checked = false;
+
+        }
+
+
+    });
+
+
+
+    if(target.checked){
+
+        alert("기본 배송지가 변경되었습니다.");
+
+    }
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+   수정 완료
+========================= */
+
+document.querySelector("#edit-area .btn-primary")
+.addEventListener("click",function(e){
+
+
+    e.preventDefault();
+
+
+
+    const name =
+        document.getElementById("editName").value;
+
+
+
+    const receiver =
+        document.getElementById("editReceiver").value;
+
+
+
+    const phone =
+        document.getElementById("editPhone").value;
+
+
+
+    const addr =
+        document.getElementById("editAddr").value;
+
+
+
+
+    if(!name || !receiver || !phone || !addr){
+
+
+        alert("필수 정보를 입력해주세요.");
+
+        return;
+
+    }
+
+
+
+    const isDefault =
+        document.getElementById("editDefault")
+        .checked;
+
+
+
+    if(isDefault){
+
+        alert("기본 배송지로 수정되었습니다.");
+
+    }
+    else{
+
+        alert("배송지가 수정되었습니다.");
+
+    }
+
+
+});
+
+
+
+
+
+
+
+/* =========================
+   신규 등록
+========================= */
+
+document.querySelector("#add .btn-primary")
+.addEventListener("click",function(e){
+
+
+    e.preventDefault();
+
+
+
+    const isDefault =
+        document.getElementById("addDefault")
+        .checked;
+
+
+
+    if(isDefault){
+
+
+        alert("기본 배송지로 등록되었습니다.");
+
+    }
+    else{
+
+
+        alert("배송지가 등록되었습니다.");
+
+    }
+
+
+});
+
+
+
+
+
+
+
+/* =================================================
+   주소 검색 기능
+================================================= */
+
+
+let addressTarget = "";
+
+
+
+
+/* 주소 검색창 열기 */
+
+function openAddress(type){
+
+
+    addressTarget = type;
+
+
+
+    document.getElementById("address-modal")
+    .style.display="flex";
+
+
+}
+
+
+
+
+
+
+/* 주소 검색 */
+
+function findAddress(){
+
+
+    const keyword =
+        document.getElementById("address-keyword")
+        .value;
+
+
+
+    const result =
+        document.getElementById("address-result");
+
+
+
+
+    if(keyword.trim()===""){
+
+
+        result.innerHTML =
+        "검색어를 입력해주세요.";
+
+
+        return;
+
+    }
+
+
+
+
+
+    // 테스트용 주소 목록
+
+    result.innerHTML = `
+
+
+        <div class="address-item"
+        onclick="selectAddress('서울특별시 성동구 왕십리로 100')">
+
+            서울특별시 성동구 왕십리로 100
+
+        </div>
+
+
+
+        <div class="address-item"
+        onclick="selectAddress('서울특별시 강남구 테헤란로 100')">
+
+            서울특별시 강남구 테헤란로 100
+
+        </div>
+
+
+
+        <div class="address-item"
+        onclick="selectAddress('서울특별시 송파구 올림픽로 300')">
+
+            서울특별시 송파구 올림픽로 300
+
+        </div>
+
+
+    `;
+
+
+}
+
+
+
+
+
+
+
+/* 주소 선택 */
+
+function selectAddress(address){
+
+
+
+    // 신규 등록
+
+    if(addressTarget === "add"){
+
+
+        document.getElementById("addAddr")
+        .value = address;
+
+
+    }
+
+
+
+    // 배송지 수정
+
+    if(addressTarget === "edit"){
+
+
+        document.getElementById("editAddr")
+        .value = address;
+
+
+    }
+
+
+
+    closeAddress();
+
+
+}
+
+
+
+
+
+
+
+/* 주소 검색창 닫기 */
+
+function closeAddress(){
+
+
+    document.getElementById("address-modal")
+    .style.display="none";
+
+
+
+    document.getElementById("address-keyword")
+    .value="";
+
+
+
+    document.getElementById("address-result")
+    .innerHTML =
+    "검색 결과가 표시됩니다.";
+
+
+}
+
+
+
 </script>
 </body>
 </html>

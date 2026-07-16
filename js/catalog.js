@@ -28,7 +28,11 @@
     acc: "액세서리",
   };
 
-  const CACHE_CATEGORIES = "catchcatch.cache.categories";
+  // 페이지 로드 동안만 유지되는 메모리 캐시(Promise).
+  // ⚠️ sessionStorage 를 쓰지 않는다: 개발 중 시드를 다시 넣으면 카테고리 ID가 바뀌는데,
+  //    sessionStorage 에 옛 ID가 남아 있으면 카테고리 필터가 "존재하지 않는 ID"로 조회해
+  //    빈 결과가 나온다. 메모리 캐시는 새로고침/페이지 이동 때마다 초기화되어 항상 최신을 받는다.
+  let categoriesPromise = null;
 
   // 재귀 트리 → 평탄한 [{categoryId, name}] 배열
   function flatten(nodes, out) {
@@ -44,24 +48,17 @@
   const CatchCatalog = {
     SLUG_TO_NAME,
 
-    // 카테고리 평탄 목록 (세션 캐시). 실패 시 빈 배열.
-    async categories() {
-      const cached = sessionStorage.getItem(CACHE_CATEGORIES);
-      if (cached) {
-        try {
-          return JSON.parse(cached);
-        } catch (_) {
-          /* 캐시 손상 시 재조회 */
-        }
+    // 카테고리 평탄 목록 (페이지 로드 내 1회 조회). 실패 시 빈 배열.
+    categories() {
+      if (!categoriesPromise) {
+        categoriesPromise = CatchApi.get("/categories")
+          .then((tree) => flatten(tree, []))
+          .catch(() => {
+            categoriesPromise = null; // 실패 시 캐시 비워 다음 호출에서 재시도
+            return [];
+          });
       }
-      try {
-        const tree = await CatchApi.get("/categories");
-        const flat = flatten(tree, []);
-        sessionStorage.setItem(CACHE_CATEGORIES, JSON.stringify(flat));
-        return flat;
-      } catch (_) {
-        return [];
-      }
+      return categoriesPromise;
     },
 
     // 슬러그(outer) → categoryId. 매칭 실패 시 null.

@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const imageUrl =
       item.thumbnailUrl ||
-      "https://placehold.co/300x400?text=NO+IMAGE";
+      CatchApi.PLACEHOLDER;
 
     const price =
       Number(item.price ?? 0);
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <img
             src="${escapeHtml(imageUrl)}"
             alt="${escapeHtml(productName)}"
-            onerror="this.src='https://placehold.co/300x400?text=NO+IMAGE'"
+            onerror="this.onerror=null;this.src=CatchApi.PLACEHOLDER"
           >
         </a>
 

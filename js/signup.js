@@ -142,10 +142,34 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ===== 최종 제출 =====
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    // TODO: POST /api/v1/auth/user/signup
-    showStep(3);
+  form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    username: document.getElementById("userId").value.trim(),
+    password: document.getElementById("pw").value,
+    name: document.getElementById("name").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    // 하이픈 등 제거해서 숫자만 (백엔드는 \d{9,11} 요구)
+    phoneNumber: document.getElementById("phone").value.replace(/[^0-9]/g, ""),
+  };
+
+  try {
+    const res = await fetch("/api/v1/auth/user/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok || !data || data.success === false) {
+      alert((data && data.message) || "회원가입에 실패했습니다.");
+      return;
+    }
+    showStep(3); // 성공 시에만 완료 화면
+  } catch (err) {
+    alert("서버에 연결할 수 없습니다. WEB/WAS 상태를 확인해 주세요.");
+  }
   });
 
 });

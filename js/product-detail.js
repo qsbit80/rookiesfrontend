@@ -3,6 +3,8 @@
 // ⚠️ auth.js → api.js → product.js 다음에 로드된다.
 
 document.addEventListener("DOMContentLoaded", () => {
+  const DIRECT_CHECKOUT_KEY = "catchcatch.directCheckoutItem";
+  const CART_CHECKOUT_IDS_KEY = "catchcatch.checkoutCartItemIds";
   const params = new URLSearchParams(location.search);
   const productId = Number(params.get("id"));
   const brandFromQuery = params.get("brand"); // 목록에서 넘어온 브랜드명(폴백용)
@@ -289,18 +291,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 바로구매 → 장바구니 담고 주문서로
-    $('[data-action="buy-now"]').addEventListener("click", async () => {
+    // 바로구매 → 장바구니를 거치지 않고 선택 상품만 주문서로 전달
+    $('[data-action="buy-now"]').addEventListener("click", () => {
       if (blockIfSeller()) return;
       if (!requireOption()) return;
       if (!CatchAuth.requireLogin()) return;
       try {
-        await CatchApi.post("/carts", {
+        sessionStorage.setItem(DIRECT_CHECKOUT_KEY, JSON.stringify({
           productId: productId,
-          productOptionId: selectedOption.optionId,
+          optionId: selectedOption ? selectedOption.optionId : null,
           quantity: qty,
-        });
-        location.href = "checkout.html";
+        }));
+        sessionStorage.removeItem(CART_CHECKOUT_IDS_KEY);
+        location.href = "checkout.html?mode=direct";
       } catch (err) {
         alert(err.message || "주문 진행에 실패했습니다.");
       }

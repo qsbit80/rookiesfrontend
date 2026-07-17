@@ -41,7 +41,6 @@
 <nav class="cats" aria-label="상품 카테고리">
   <div class="wrap">
     <a href="product-list.html">전체</a>
-    <a href="product-list.html?view=best">베스트</a>
     <a href="brand.html">브랜드</a>
     <a href="product-list.html?cat=outer">아우터</a>
     <a href="product-list.html?cat=top">상의</a>
@@ -95,7 +94,7 @@
       </div>
       <div class="foot-col">
         <h5>Shop</h5>
-        <a href="product-list.html">베스트</a><a href="product-list.html?cat=outer">아우터</a>
+<a href="product-list.html?cat=outer">아우터</a>
       </div>
       <div class="foot-col">
         <h5>Customer</h5>
@@ -142,7 +141,7 @@
     CANCELED: "취소됨",
     RETURN_REQUESTED: "반품신청중",
     EXCHANGE_REQUESTED: "교환신청중",
-    REFUNDED: "환불완료"
+    REFUNDED: "반품완료"
   };
   const STATUS_CLASS = { SHIPPING: "shipping", DELIVERED: "delivered", CONFIRMED: "confirmed" };
 
@@ -206,9 +205,9 @@
   function rowCard(row) {
     const statusLabel = STATUS_LABEL[row.deliveryStatus] || row.deliveryStatus;
     const statusClass = STATUS_CLASS[row.deliveryStatus] || "";
-    let action = `<button type="button" class="text-btn" data-action="claim" data-id="${row.orderDetailId}">교환/환불 신청</button>`;
+    let action = `<button type="button" class="text-btn" data-action="claim" data-id="${row.orderDetailId}">교환/반품 신청</button>`;
     if (row.deliveryStatus === "DELIVERED") {
-      action = `<button class="btn btn-dark" data-action="confirm" data-id="${row.orderDetailId}">구매 확정</button><button class="btn" data-action="claim" data-id="${row.orderDetailId}">교환/환불 신청</button>`;
+      action = `<button class="btn btn-dark" data-action="confirm" data-id="${row.orderDetailId}">구매 확정</button><button class="btn" data-action="claim" data-id="${row.orderDetailId}">교환/반품 신청</button>`;
     } else if (row.deliveryStatus === "CONFIRMED") {
       action = `<a class="btn btn-dark" href="review-write.html?orderDetailId=${row.orderDetailId}&productId=${row.productId}">리뷰 작성</a>`;
     } else if (row.deliveryStatus === "CANCELED" || row.deliveryStatus === "REFUNDED") {
@@ -264,8 +263,8 @@
         const order = await apiFetch(`/orders/${row.orderId}/statement`);
         dialogContent.innerHTML = `${summary}<div class="statement-box"><div class="statement-title">거 래 명 세 서</div><dl><div><dt>공급자</dt><dd>CATCHCATCH STORE</dd></div><div><dt>품목</dt><dd>${row.productName}</dd></div><div><dt>수량 / 금액</dt><dd>${row.quantity}개 / ${money.format(row.totalPrice)}원</dd></div><div><dt>최종 결제 금액</dt><dd>${money.format(order.finalPaymentAmount)}원</dd></div></dl></div><button type="button" class="btn btn-dark full" data-action="print">인쇄하기</button>`;
       } else if (type === 'claim') {
-        dialogKicker.textContent = 'EXCHANGE / RETURN'; dialogTitle.textContent = '교환/환불 신청';
-        dialogContent.innerHTML = `${summary}<form id="claimForm" class="claim-form"><label>신청 유형<select name="type" required><option value="EXCHANGE">교환</option><option value="RETURN">환불</option></select></label><label>상세 사유<textarea name="reason" required placeholder="상세 사유를 입력해 주세요."></textarea></label><p class="dialog-note">구매 확정 전 주문 상품에 한해 신청할 수 있습니다.</p><button type="submit" class="btn btn-dark full">신청하기</button></form>`;
+        dialogKicker.textContent = 'EXCHANGE / RETURN'; dialogTitle.textContent = '교환/반품 신청';
+        dialogContent.innerHTML = `${summary}<form id="claimForm" class="claim-form"><label>신청 유형<select name="type" required><option value="EXCHANGE">교환</option><option value="RETURN">반품</option></select></label><label>상세 사유<textarea name="reason" required placeholder="상세 사유를 입력해 주세요."></textarea></label><p class="dialog-note">구매 확정 전 주문 상품에 한해 신청할 수 있습니다.</p><button type="submit" class="btn btn-dark full">신청하기</button></form>`;
       } else {
         dialogKicker.textContent = 'ORDER DETAIL'; dialogTitle.textContent = '주문 상세';
         dialogContent.innerHTML = `${summary}<dl class="receipt-list"><div><dt>주문 상태</dt><dd>${STATUS_LABEL[row.deliveryStatus] || row.deliveryStatus}</dd></div><div><dt>결제 금액</dt><dd>${money.format(row.totalPrice)}원</dd></div></dl>`;
@@ -277,7 +276,7 @@
   }
 
   async function confirmPurchase(row) {
-    if (!window.confirm('구매를 확정하시겠습니까?\n구매 확정 후에는 교환·환불 신청이 제한됩니다.')) return;
+    if (!window.confirm('구매를 확정하시겠습니까?\n구매 확정 후에는 교환·반품 신청이 제한됩니다.')) return;
     try {
       await apiFetch(`/orders/${row.orderDetailId}/confirm`, { method: 'PUT' });
       row.deliveryStatus = 'CONFIRMED';
@@ -330,7 +329,7 @@
       dialog.close();
       selectedRow.deliveryStatus = form.elements.type.value === 'EXCHANGE' ? 'EXCHANGE_REQUESTED' : 'RETURN_REQUESTED';
       renderRows();
-      showToast('교환/환불 신청이 접수되었습니다.');
+      showToast('교환/반품 신청이 접수되었습니다.');
     } catch (error) {
       showToast(error.message);
     }

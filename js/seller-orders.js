@@ -42,6 +42,7 @@
       optionText: "화이트 / L",
       imageUrl: "",
       buyerName: "김민수",
+      buyerUsername: "minsu01",
       quantity: 2,
       paymentAmount: 39800,
       status: "PAYMENT_COMPLETED"
@@ -54,6 +55,7 @@
       optionText: "블랙 / M",
       imageUrl: "",
       buyerName: "이서연",
+      buyerUsername: "seoyeon",
       quantity: 1,
       paymentAmount: 39900,
       status: "PREPARING"
@@ -66,6 +68,7 @@
       optionText: "블랙",
       imageUrl: "",
       buyerName: "박지훈",
+      buyerUsername: "jihoon22",
       quantity: 1,
       paymentAmount: 32900,
       status: "SHIPPING",
@@ -193,6 +196,18 @@
       CANCELED: {
         label: "취소",
         className: "status-cancelled"
+      },
+      RETURN_REQUESTED: {
+        label: "반품신청중",
+        className: "status-cancelled"
+      },
+      EXCHANGE_REQUESTED: {
+        label: "교환신청중",
+        className: "status-cancelled"
+      },
+      REFUNDED: {
+        label: "반품완료",
+        className: "status-cancelled"
       }
     };
 
@@ -237,6 +252,11 @@
         raw.customerName ??
         raw.userName ??
         "-",
+      buyerUsername:
+        raw.buyerUsername ??
+        raw.buyerLoginId ??
+        raw.username ??
+        "",
       quantity:
         raw.quantity ??
         raw.orderQuantity ??
@@ -301,6 +321,27 @@
     return ["PAYMENT_COMPLETED", "PREPARING"].includes(status.code);
   }
 
+  // 배송완료 처리는 배송중(SHIPPING) 상태에서만 가능하다. (백엔드 completeDelivery)
+  // 이 처리가 끝나야 구매자의 구매확정·정산이 진행된다.
+  function canCompleteDelivery(status) {
+    return status.code === "SHIPPING";
+  }
+
+  // 현재 배송 상태에 맞는 액션 버튼 하나를 그린다.
+  //   결제완료/배송준비 → 배송(운송장) 등록
+  //   배송중            → 배송 완료
+  //   그 외(완료/취소/반품 등) → 처리할 배송 액션 없음
+  function renderActionButton(order, mobile) {
+    const id = escapeHtml(order.orderDetailId);
+    if (canUpdateDelivery(order.status)) {
+      return `<button class="delivery-button" type="button" data-action="register" data-order-detail-id="${id}">${mobile ? "배송 정보 등록" : "배송 등록"}</button>`;
+    }
+    if (canCompleteDelivery(order.status)) {
+      return `<button class="delivery-button complete" type="button" data-action="complete" data-order-detail-id="${id}">배송 완료</button>`;
+    }
+    return `<span class="no-action">-</span>`;
+  }
+
   function renderDesktop(orders) {
     if (!orders.length) {
       tableBody.innerHTML = `
@@ -330,20 +371,14 @@
             </div>
           </div>
         </td>
-        <td>${escapeHtml(order.buyerName)}</td>
+        <td>
+          <strong class="buyer-name">${escapeHtml(order.buyerName)}</strong>
+          ${order.buyerUsername ? `<span class="buyer-id">@${escapeHtml(order.buyerUsername)}</span>` : ""}
+        </td>
         <td>${Number(order.quantity).toLocaleString("ko-KR")}개</td>
         <td>${formatPrice(order.paymentAmount)}</td>
         <td>${renderStatus(order.status)}</td>
-        <td>
-          <button
-            class="delivery-button"
-            type="button"
-            data-order-detail-id="${escapeHtml(order.orderDetailId)}"
-            ${canUpdateDelivery(order.status) ? "" : "disabled"}
-          >
-            배송 등록
-          </button>
-        </td>
+        <td>${renderActionButton(order, false)}</td>
       </tr>
     `).join("");
   }
@@ -378,19 +413,12 @@
         </div>
 
         <div class="mobile-order-meta">
-          <span>구매자</span><b>${escapeHtml(order.buyerName)}</b>
+          <span>구매자</span><b>${escapeHtml(order.buyerName)}${order.buyerUsername ? ` <span class="buyer-id-inline">@${escapeHtml(order.buyerUsername)}</span>` : ""}</b>
           <span>수량</span><b>${Number(order.quantity).toLocaleString("ko-KR")}개</b>
           <span>결제 금액</span><b>${formatPrice(order.paymentAmount)}</b>
         </div>
 
-        <button
-          class="delivery-button"
-          type="button"
-          data-order-detail-id="${escapeHtml(order.orderDetailId)}"
-          ${canUpdateDelivery(order.status) ? "" : "disabled"}
-        >
-          배송 정보 등록
-        </button>
+        ${renderActionButton(order, true)}
       </article>
     `).join("");
   }
@@ -659,11 +687,69 @@
     }
   }
 
+  // 배송중 → 배송완료 처리. PATCH /seller/orders/{id}/deliver-complete
+  // 이 처리가 끝나야 구매자가 구매확정을 할 수 있고 정산도 생성된다(= 결제 활동 종료).
+  async function completeDelivery(orderDetailId) {
+    const order = currentOrders.find(
+      (item) => String(item.orderDetailId) === String(orderDetailId)
+    );
+    if (!order) return;
+
+    if (!window.confirm(
+      `${order.orderNumber} 주문을 배송 완료로 변경할까요?\n` +
+      `배송 완료 후에는 구매자의 구매확정과 정산이 진행됩니다.`
+    )) return;
+
+    if (FILE_PREVIEW_MODE) {
+      const previewOrder = previewOrders.find(
+        (item) => String(item.orderDetailId) === String(orderDetailId)
+      );
+      if (previewOrder) previewOrder.status = "DELIVERED";
+      showMessage("미리보기 모드에서 배송 완료로 반영되었습니다.", "success");
+      loadOrders(currentPage);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${ORDERS_API}/${encodeURIComponent(orderDetailId)}/deliver-complete`,
+        {
+          method: "PATCH",
+          credentials: "include"
+        }
+      );
+
+      if (handleUnauthorized(response)) return;
+
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (_) {}
+
+      if (!response.ok) {
+        throw new Error(data.message || "배송 완료 처리에 실패했습니다.");
+      }
+
+      showMessage("배송 완료로 변경했습니다.", "success");
+      loadOrders(currentPage);
+    } catch (error) {
+      showMessage(
+        error instanceof TypeError
+          ? "서버에 연결할 수 없습니다. WEB/WAS 서버 상태를 확인해 주세요."
+          : error.message
+      );
+    }
+  }
+
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-order-detail-id]");
     if (!button || button.disabled) return;
 
-    openDeliveryModal(button.dataset.orderDetailId);
+    if (button.dataset.action === "complete") {
+      completeDelivery(button.dataset.orderDetailId);
+    } else {
+      openDeliveryModal(button.dataset.orderDetailId);
+    }
   });
 
   searchForm.addEventListener("submit", (event) => {

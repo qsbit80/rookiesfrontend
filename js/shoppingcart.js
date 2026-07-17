@@ -420,6 +420,7 @@
       "catchcatch.checkoutCartItemIds",
       JSON.stringify(selectedIds)
     );
+    sessionStorage.removeItem("catchcatch.directCheckoutItem");
 
     location.href = "checkout.html";
   });

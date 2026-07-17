@@ -1,17 +1,15 @@
 // seller-claims.js — 판매자 교환/환불 관리
-// GET  /api/v1/seller/claims              (목록 조회, status/claimType 필터)
-// PUT  /api/v1/seller/claims/{id}/status  (상태 변경: 접수/처리중/반려, 교환 완료)
-// POST /api/v1/seller/refunds             (환불(RETURN) 최종 완료 처리 — S-CLAIM-003)
+// GET  /api/v1/seller/claims              (목록 조회, status 필터)
+// PUT  /api/v1/seller/claims/{id}/status  (상태 변경: 승인/반려/처리중, 교환 완료)
+// POST /api/v1/seller/refunds             (환불(RETURN) 승인·완료 — S-CLAIM-003)
 // 판매자 로그인 필요
 //
-// [수정 내역]
-// 1) 백엔드 ClaimType 은 RETURN/EXCHANGE 인데 기존 TYPE_KO 가 REFUND 로 되어 있어
-//    환불 건이 "RETURN" 으로 날것 표시되던 문제 수정
-// 2) HTML 드롭다운(검토중/승인)과 JS 매핑(신청/처리중)이 어긋나
-//    검토중·승인 선택 시 status=undefined 로 전송되어 400 나던 문제 수정
-// 3) "완료"는 유형별로 분기: 환불(RETURN) → POST /seller/refunds,
-//    교환(EXCHANGE) → PUT status=COMPLETED (백엔드도 함께 수정됨)
-// 4) 현재 상태가 드롭다운에 없어 항상 "접수"로 보이던 문제 → 상세에 현재 상태 표시
+// [개편 내역]
+// - 클레임 상세에 "고객 아이디(buyerUsername)"와 "구매일시(orderedAt)"를 표시
+//   (백엔드 SellerClaimResponse 에 두 필드가 추가됨)
+// - 상태 변경 드롭다운을 없애고, 현재 상태에서 가능한 처리만 버튼으로 노출
+//   (승인/반려/처리시작/교환완료 + 환불 승인이 "처리하기" 한곳에 모임)
+// - 상태/유형을 색상 배지로 표시해 한눈에 구분
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -41,6 +39,20 @@ document.addEventListener("DOMContentLoaded", () => {
     "완료": "COMPLETED",
   };
 
+  // 각 상태 전이 버튼의 친화적 라벨/스타일
+  const ACTION_LABEL = {
+    ACCEPTED: "요청 승인",
+    REJECTED: "요청 반려",
+    PROCESSING: "처리 시작",
+    COMPLETED: "교환 완료",
+  };
+  const ACTION_CLASS = {
+    ACCEPTED: "act-primary",
+    REJECTED: "act-reject",
+    PROCESSING: "act-primary",
+    COMPLETED: "act-success",
+  };
+
   // 백엔드가 PUT /seller/claims/{id}/status 로 허용하는 전이가 이게 전부다.
   // (SellerClaimService.validateStatusChange 기준 — 상태뿐 아니라 "유형"까지 본다)
   //   신청  → 접수 / 반려      (교환·환불 공통)
@@ -48,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //   처리중 → 완료            (교환 전용!)
   //
   // 환불(RETURN)의 완료는 이 API로 못 간다. 결제 취소·포인트 복원이 얽혀 있어
-  // POST /seller/refunds 로만 처리된다. (switch 의 default 가 INVALID_CLAIM_STATUS)
+  // POST /seller/refunds 로만 처리된다.
   function nextStatuses(claim) {
     switch (claim.status) {
       case "REQUESTED":
@@ -63,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 환불 완료 가능 조건 (SellerRefundService.validateRefundableClaim 기준)
+  // 환불 승인(최종 완료) 가능 조건 (SellerRefundService.validateRefundableClaim 기준)
   const canRefund = (claim) =>
     claim.claimType === "RETURN" &&
     ["ACCEPTED", "PROCESSING"].includes(claim.status);
@@ -71,22 +83,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const $ = (id) => document.getElementById(id);
   const won = (n) => (n == null ? "-" : n.toLocaleString("ko-KR") + "원");
 
+  // 구매일시/요청일시 표기 (연-월-일 시:분)
+  function fmtDateTime(value) {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return new Intl.DateTimeFormat("ko-KR", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit",
+    }).format(date);
+  }
+
   const filterMessage = $("claimFilterMessage");
   const statusFilter = $("claimStatusFilter");
-  const statusSelect = $("claimStatusSelect");
   const listView = $("claimList");
   const detailView = $("claimDetail");
   const filterBox = $("claimFilterBox");
-  const statusSection = $("claimStatusSection");
-  const refundSection = $("claimRefundSection");
-  const noAction = $("claimNoAction");
+  const actionHint = $("claimActionHint");
+  const actionButtons = $("claimActionButtons");
+  const refundNote = $("claimRefundNote");
 
   let claims = [];         // 전체 클레임
   let selected = null;     // 지금 선택된 클레임
 
   // ===== 화면 전환 (목록 ↔ 상세) =====
-  // 목록에서 처리할 클레임을 골라 들어가면 상세 처리 화면으로 바뀐다.
-  // 둘을 동시에 띄우지 않으므로 레이아웃은 1단(css .claim-dashboard-layout)이다.
   function showList() {
     selected = null;
     listView.hidden = false;
@@ -101,9 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo({ top: 0 });
   }
 
-  // 상태에 따른 뱃지 색 클래스
-  const statusClass = (ko) =>
-    ko === "완료" ? "done" : ko === "처리중" ? "wait" : "";
+  // 상태 enum → 배지 색 클래스
+  const statusBadgeClass = (en) => "badge-" + String(en || "").toLowerCase();
 
   // ===== 토큰 꺼내기 =====
   function getToken() {
@@ -135,9 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
       claims = json.data.content;   // 페이지 응답의 content
 
       renderList();
-
-      // 목록을 새로 불러오면(최초 진입·조회·처리 후) 항상 목록 화면으로 돌아온다.
-      // 예전에는 여기서 첫 건을 자동 선택해 상세가 곧바로 떴다.
       showList();
 
       return claims.length;
@@ -160,12 +176,13 @@ document.addEventListener("DOMContentLoaded", () => {
     tbody.innerHTML = claims.map((c) => {
       const statusKo = STATUS_KO[c.status] || c.status;
       const typeKo = TYPE_KO[c.claimType] || c.claimType;
+      const typeClass = "type-" + String(c.claimType || "").toLowerCase();
       return `
         <tr class="claim-item" data-id="${c.claimId}">
           <td>${c.claimId}</td>
-          <td>${c.productName}</td>
-          <td>${typeKo}</td>
-          <td><span class="status ${statusClass(statusKo)}">${statusKo}</span></td>
+          <td class="col-product">${c.productName}</td>
+          <td><span class="claim-type-badge ${typeClass}">${typeKo}</span></td>
+          <td><span class="claim-status-badge ${statusBadgeClass(c.status)}">${statusKo}</span></td>
         </tr>
       `;
     }).join("");
@@ -189,69 +206,95 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const statusKo = STATUS_KO[selected.status] || selected.status;
+    const typeKo = TYPE_KO[selected.claimType] || selected.claimType;
 
-    // 상세 채우기
-    $("claimId").textContent = selected.claimId;
+    // 요약: 유형 배지 + 상품 + 상태 배지
+    const typeBadge = $("claimTypeBadge");
+    typeBadge.textContent = typeKo;
+    typeBadge.className =
+      "claim-type-badge type-" + String(selected.claimType || "").toLowerCase();
+
     $("claimProduct").textContent = selected.productName;
-    $("claimType").textContent = TYPE_KO[selected.claimType] || selected.claimType;
-    $("claimReason").textContent = selected.reason || "-";
+
+    const statusBadge = $("claimStatusBadge");
+    statusBadge.textContent = statusKo;
+    statusBadge.className =
+      "claim-status-badge " + statusBadgeClass(selected.status);
+
+    // 고객 · 주문 정보 (환불 요청 고객 아이디 / 구매 시점)
+    $("claimBuyer").textContent = selected.buyerUsername || "-";
+    $("claimOrderedAt").textContent = fmtDateTime(selected.orderedAt);
+    $("claimId").textContent = selected.claimId;
+    $("claimRequestedAt").textContent = fmtDateTime(selected.requestedAt);
+
+    // 요청 내용
+    $("claimType").textContent = typeKo;
     $("claimAmount").textContent = won(selected.claimAmount);
+    $("claimReason").textContent = selected.reason || "-";
 
-    // 현재 상태 표시 (HTML에 claimStatus 요소가 있을 때)
-    const statusEl = $("claimStatus");
-    if (statusEl) statusEl.textContent = statusKo;
-
-    // 최종 환불 안내의 금액도 선택된 건에 맞춘다 (예전에는 45,000원이 하드코딩돼 있었다)
-    const refundEl = $("refundAmount");
-    if (refundEl) refundEl.textContent = won(selected.claimAmount);
+    // 판매자 처리 사유는 있을 때만 노출
+    const processReasonCell = $("processReasonCell");
+    if (selected.processReason) {
+      $("claimProcessReason").textContent = selected.processReason;
+      processReasonCell.hidden = false;
+    } else {
+      processReasonCell.hidden = true;
+    }
 
     renderActions(selected);
-
     showDetail();
   }
 
-  // ===== 현재 상태에서 실제로 가능한 처리만 노출 =====
-  // 예전에는 접수/처리중/반려/완료를 항상 띄우고 현재 상태를 그대로 선택해 뒀다.
-  // 그래서 아무것도 안 바꾸고 [상태 변경]을 누르면 접수→접수 처럼 백엔드가 막는 전이가
-  // 그대로 나가 "현재 상태에서는 클레임을 변경할 수 없습니다" 가 떴다.
+  // ===== 현재 상태에서 실제로 가능한 처리만 버튼으로 노출 =====
   function renderActions(claim) {
     const next = nextStatuses(claim);
     const refundable = canRefund(claim);
 
-    statusSelect.innerHTML = next
-      .map((en) => `<option value="${en}">${STATUS_KO[en]}</option>`)
-      .join("");
+    actionButtons.innerHTML = "";
 
-    statusSection.hidden = next.length === 0;
-    refundSection.hidden = !refundable;
+    // 상태 전이 버튼
+    next.forEach((en) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "action-btn " + (ACTION_CLASS[en] || "act-primary");
+      btn.textContent = ACTION_LABEL[en] || STATUS_KO[en] || en;
+      btn.addEventListener("click", () => doStatusChange(en));
+      actionButtons.appendChild(btn);
+    });
 
-    // 상태 변경도 환불도 불가능한 경우엔 이유를 알려준다.
-    // (지금은 반려·완료 같은 종료 상태에서만 여기 걸린다)
+    // 환불 승인(최종 완료) 버튼
+    if (refundable) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "action-btn act-refund";
+      btn.textContent = `환불 승인 · 완료 (${won(claim.claimAmount)})`;
+      btn.addEventListener("click", doRefund);
+      actionButtons.appendChild(btn);
+    }
+
+    refundNote.hidden = !refundable;
+
+    // 안내 문구
     if (next.length === 0 && !refundable) {
-      noAction.hidden = false;
-      noAction.textContent = `이미 ${STATUS_KO[claim.status] || claim.status}된 클레임이라 더 진행할 처리가 없습니다.`;
+      actionHint.textContent =
+        `이미 ${STATUS_KO[claim.status] || claim.status}된 클레임이라 추가로 진행할 처리가 없습니다.`;
+    } else if (claim.status === "REQUESTED") {
+      actionHint.textContent = "고객 요청을 검토한 뒤 승인 또는 반려하세요.";
+    } else if (refundable) {
+      actionHint.textContent =
+        "환불(반품) 요청입니다. ‘환불 승인 · 완료’를 누르면 최종 환불 처리됩니다.";
     } else {
-      noAction.hidden = true;
+      actionHint.textContent = "다음 단계로 상태를 변경할 수 있습니다.";
     }
   }
 
   // ===== 상태 변경 (PUT) =====
-  async function updateStatus() {
-    if (!selected) {
-      alert("클레임을 먼저 선택해 주세요.");
-      return;
-    }
+  async function doStatusChange(statusEn) {
+    if (!selected) return;
 
-    // 드롭다운 option 의 value 가 곧 백엔드 enum 이다. (renderActions 가 채운다)
-    const statusEn = (statusSelect.value || "").trim();
     const statusKo = STATUS_KO[statusEn] || statusEn;
 
-    if (!statusEn) {
-      alert("변경할 상태를 선택해 주세요.");
-      return;
-    }
-
-    const reason = prompt("처리 사유를 입력해 주세요.", "판매자 처리");
+    const reason = prompt(`처리 사유를 입력해 주세요. (${statusKo})`, "판매자 처리");
     if (reason === null) return; // 취소
 
     try {
@@ -269,9 +312,8 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(errJson.message || "상태 변경 실패: " + res.status);
       }
 
-      filterMessage.textContent = `${selected.claimId}번 클레임 상태를 ${statusKo}(으)로 변경했습니다.`;
-
-      // 목록 새로고침
+      filterMessage.textContent =
+        `${selected.claimId}번 클레임을 ${statusKo}(으)로 변경했습니다.`;
       loadClaims();
     } catch (err) {
       console.error(err);
@@ -279,40 +321,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ===== 필터 (조회 버튼) =====
-  // ※ 백엔드가 status/claimType 파라미터를 받으므로 서버 조회로 처리
-  async function searchClaims() {
-    const statusKo = statusFilter.value;
-    const statusEn = statusKo === "all" ? "" : STATUS_EN[statusKo] || "";
-
-    const count = await loadClaims(statusEn);
-    if (count !== null) {
-      filterMessage.textContent = `${count}건의 클레임을 조회했습니다.`;
-    }
-  }
-
-  // ===== 환불(RETURN) 최종 완료 처리 =====
+  // ===== 환불(RETURN) 승인·완료 처리 =====
   // POST /api/v1/seller/refunds  { claimId, memo }
-  // 백엔드가 PG 취소·포인트 회수(추후)와 클레임 완료, 배송상태 REFUNDED 전환을 수행한다.
-  async function completeRefund() {
-    if (!selected) {
-      alert("클레임을 먼저 선택해 주세요.");
-      return;
-    }
+  // 백엔드가 클레임 완료, 배송상태 REFUNDED 전환, 포인트·쿠폰 복원(주문 전체 환불 시)을 수행한다.
+  async function doRefund() {
+    if (!selected) return;
+
     if (selected.claimType !== "RETURN") {
-      alert("환불(반품) 요청 건에서만 최종 환불 처리를 할 수 있습니다.\n교환 건은 상태를 '완료'로 변경해 주세요.");
+      alert("환불(반품) 요청 건에서만 환불 승인이 가능합니다.\n교환 건은 ‘교환 완료’로 처리해 주세요.");
       return;
     }
     // 백엔드는 ACCEPTED 또는 PROCESSING 상태에서만 환불을 허용한다.
     if (!["ACCEPTED", "PROCESSING"].includes(selected.status)) {
-      alert("접수 또는 처리중 상태의 환불 건만 완료 처리할 수 있습니다.");
+      alert("접수 또는 처리중 상태의 환불 건만 승인할 수 있습니다.");
       return;
     }
 
     const memo = prompt("환불 처리 메모를 입력해 주세요. (선택)", "");
     if (memo === null) return; // 취소
 
-    if (!confirm(`${selected.claimId}번 클레임을 최종 환불 처리할까요?\n환불 금액: ${won(selected.claimAmount)}`)) {
+    if (!confirm(`${selected.claimId}번 클레임을 환불 승인 · 완료할까요?\n환불 금액: ${won(selected.claimAmount)}`)) {
       return;
     }
 
@@ -331,7 +359,8 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(errJson.message || "환불 처리 실패: " + res.status);
       }
 
-      filterMessage.textContent = `${selected.claimId}번 클레임의 환불이 완료 처리되었습니다.`;
+      filterMessage.textContent =
+        `${selected.claimId}번 클레임의 환불이 승인 · 완료되었습니다.`;
       loadClaims();
     } catch (err) {
       console.error(err);
@@ -339,10 +368,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ===== 필터 (조회 버튼) =====
+  async function searchClaims() {
+    const statusKo = statusFilter.value;
+    const statusEn = statusKo === "all" ? "" : STATUS_EN[statusKo] || "";
+
+    const count = await loadClaims(statusEn);
+    if (count !== null) {
+      filterMessage.textContent = `${count}건의 클레임을 조회했습니다.`;
+    }
+  }
+
   // ===== 버튼 연결 =====
   $("claimSearchButton").addEventListener("click", searchClaims);
-  $("updateClaimStatusButton").addEventListener("click", updateStatus);
-  $("completeRefundButton").addEventListener("click", completeRefund);
   $("claimBackButton").addEventListener("click", showList);
 
   // ===== 시작 =====

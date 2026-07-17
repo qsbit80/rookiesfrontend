@@ -51,7 +51,6 @@
 <nav class="cats">
   <div class="wrap">
     <a href="product-list.html">전체</a>
-    <a href="product-list.html?view=best">베스트</a>
     <a href="brand.html">브랜드</a>
     <a href="product-list.html?cat=outer">아우터</a>
     <a href="product-list.html?cat=top">상의</a>
@@ -130,9 +129,9 @@
           <div class="field">
             <label for="salesStatus">판매 상태 <strong>*</strong></label>
             <select id="salesStatus" name="salesStatus" required>
-              <option value="SELLING">판매 중</option>
-              <option value="STOPPED">판매 중지</option>
-              <option value="SOLD_OUT">품절</option>
+              <option value="ON_SALE">판매 중</option>
+              <option value="SUSPENDED">판매 중지</option>
+              <option value="SOLD_OUT" disabled>품절 (재고 소진 시 자동)</option>
             </select>
           </div>
 
@@ -226,7 +225,7 @@
       </div>
       <div class="foot-col">
         <h5>Shop</h5>
-        <a href="product-list.html?view=best">베스트</a><a href="product-list.html?cat=outer">아우터</a>
+<a href="product-list.html?cat=outer">아우터</a>
       </div>
       <div class="foot-col">
         <h5>Customer</h5>

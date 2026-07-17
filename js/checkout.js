@@ -5,6 +5,9 @@
   const money = new Intl.NumberFormat("ko-KR");
   const FREE_SHIPPING_THRESHOLD = 50000;
   const SHIPPING_FEE = 3000;
+  const DIRECT_CHECKOUT_KEY = "catchcatch.directCheckoutItem";
+  const CART_CHECKOUT_IDS_KEY = "catchcatch.checkoutCartItemIds";
+  const DIRECT_CHECKOUT_MODE = new URLSearchParams(location.search).get("mode") === "direct";
 
   const PAYMENT_TYPES = [
     { id: "CARD", label: "카드", detail: "국내외 신용카드와 체크카드로 결제합니다." },
@@ -114,11 +117,29 @@
   // 장바구니 페이지(shoppingcart.js)가 "선택 상품 주문하기" 클릭 시 저장해 둔 cartItemId 목록
   function getSelectedCartItemIds() {
     try {
-      const raw = sessionStorage.getItem("catchcatch.checkoutCartItemIds");
+      const raw = sessionStorage.getItem(CART_CHECKOUT_IDS_KEY);
       const ids = raw ? JSON.parse(raw) : [];
       return Array.isArray(ids) ? ids.map(String) : [];
     } catch (_) {
       return [];
+    }
+  }
+
+  // 상품 상세의 바로구매가 저장한 최소 식별값. 이름·가격·재고는 API에서 다시 확인한다.
+  function getDirectCheckoutItem() {
+    if (!DIRECT_CHECKOUT_MODE) return null;
+    try {
+      const raw = sessionStorage.getItem(DIRECT_CHECKOUT_KEY);
+      const item = raw ? JSON.parse(raw) : null;
+      const productId = Number(item?.productId);
+      const optionId = item?.optionId == null ? null : Number(item.optionId);
+      const quantity = Number(item?.quantity);
+      if (!Number.isInteger(productId) || productId <= 0) return null;
+      if (optionId !== null && (!Number.isInteger(optionId) || optionId <= 0)) return null;
+      if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 10) return null;
+      return { productId, optionId, quantity };
+    } catch (_) {
+      return null;
     }
   }
 
@@ -296,6 +317,34 @@
       .filter((item) => selectedIds.includes(String(item.cartItemId)));
   }
 
+  async function loadDirectItem(requestedItem) {
+    const product = await apiFetch(`/products/${encodeURIComponent(requestedItem.productId)}`);
+    const options = Array.isArray(product?.options) ? product.options : [];
+    const option = requestedItem.optionId == null
+      ? null
+      : options.find((candidate) => Number(candidate.optionId) === requestedItem.optionId);
+
+    if (!option && (options.length > 0 || requestedItem.optionId !== null)) {
+      throw new Error("선택한 상품 옵션을 확인할 수 없습니다. 상품 상세에서 다시 선택해 주세요.");
+    }
+    if (option && (option.soldOut || Number(option.stockQuantity) < requestedItem.quantity)) {
+      throw new Error("선택한 상품의 재고가 부족합니다. 수량을 다시 선택해 주세요.");
+    }
+
+    // 주문 API가 계산하는 금액(product.price + option.additionalPrice)과 동일하게 표시한다.
+    const unitPrice = Number(product.price || 0) + Number(option?.additionalPrice || 0);
+    state.cartItems = [{
+      cartItemId: null,
+      productId: requestedItem.productId,
+      optionId: requestedItem.optionId,
+      productName: product.name,
+      optionName: option?.optionName || "옵션 없음",
+      price: unitPrice,
+      quantity: requestedItem.quantity,
+      totalPrice: unitPrice * requestedItem.quantity,
+    }];
+  }
+
   async function submitOrder() {
     if (elements.payButton.disabled || state.paying) return;
     const address = getSelectedAddress();
@@ -347,7 +396,8 @@
         }),
       });
 
-      sessionStorage.removeItem("catchcatch.checkoutCartItemIds");
+      sessionStorage.removeItem(CART_CHECKOUT_IDS_KEY);
+      sessionStorage.removeItem(DIRECT_CHECKOUT_KEY);
       location.href = `orders.html?orderId=${encodeURIComponent(order.orderId)}`;
     } catch (error) {
       setNotice(error.message);
@@ -359,11 +409,21 @@
   async function initialize() {
     if (!window.CatchAuth || !window.CatchAuth.requireLogin()) return;
 
-    if (!getSelectedCartItemIds().length) {
+    const directItem = getDirectCheckoutItem();
+    const selectedCartItemIds = getSelectedCartItemIds();
+    const hasCheckoutItems = DIRECT_CHECKOUT_MODE
+      ? Boolean(directItem)
+      : selectedCartItemIds.length > 0;
+    if (!hasCheckoutItems) {
       elements.loading.hidden = true;
       elements.content.hidden = false;
       renderAll();
-      setNotice("장바구니에서 주문할 상품을 선택해 주세요.", "info");
+      setNotice(
+        DIRECT_CHECKOUT_MODE
+          ? "바로구매 상품 정보가 없습니다. 상품 상세에서 다시 선택해 주세요."
+          : "장바구니에서 주문할 상품을 선택해 주세요.",
+        "info"
+      );
       return;
     }
 
@@ -372,7 +432,7 @@
         apiFetch("/orders/checkout"),
         apiFetch("/users/me/addresses"),
         apiFetch("/users/me/coupons?size=100"),
-        loadCartItems(),
+        DIRECT_CHECKOUT_MODE ? loadDirectItem(directItem) : loadCartItems(),
       ]);
       state.defaults = defaults;
       state.addresses = Array.isArray(addresses) ? addresses : [];

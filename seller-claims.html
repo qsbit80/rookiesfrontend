@@ -59,7 +59,6 @@
 <nav class="cats">
   <div class="wrap">
     <a href="product-list.html">전체</a>
-    <a href="product-list.html?view=best">베스트</a>
     <a href="brand.html">브랜드</a>
     <a href="product-list.html?cat=outer">아우터</a>
     <a href="product-list.html?cat=top">상의</a>
@@ -94,6 +93,7 @@
 <nav class="seller-page-links" aria-label="판매자 관리 메뉴">
   <a href="seller-dashboard.html">대시보드</a>
   <a href="seller-products.html">상품 관리</a>
+  <a href="seller-orders.html">주문 관리</a>
   <a href="seller-sales.html?tab=sales">매출·정산</a>
   <a href="seller-qna.html?status=wait">Q&amp;A 관리</a>
   <a class="active" aria-current="page" href="seller-claims.html">교환·환불</a>
@@ -218,63 +218,60 @@
 
 <div class="detail-box">
 
+  <!-- 요약: 유형 배지 + 상품명 + 현재 상태 배지 -->
+  <div class="claim-summary">
+    <div class="claim-summary-left">
+      <span class="claim-type-badge" id="claimTypeBadge">-</span>
+      <strong class="claim-summary-product" id="claimProduct">-</strong>
+    </div>
+    <span class="claim-status-badge" id="claimStatusBadge">-</span>
+  </div>
 
-<div class="detail-row">
+  <!-- 고객 · 주문 정보 (환불을 요청한 고객 아이디 / 구매 시점) -->
+  <div class="info-card">
+    <h5 class="info-card-title">고객 · 주문 정보</h5>
+    <div class="info-grid">
+      <div class="info-cell">
+        <span class="info-label">고객 아이디</span>
+        <span class="info-value" id="claimBuyer">-</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">구매일시</span>
+        <span class="info-value" id="claimOrderedAt">-</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">요청번호</span>
+        <span class="info-value" id="claimId">-</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">요청일시</span>
+        <span class="info-value" id="claimRequestedAt">-</span>
+      </div>
+    </div>
+  </div>
 
-<label>요청번호</label>
-
-<p id="claimId">-</p>
-
-</div>
-
-
-<div class="detail-row">
-
-<label>상품명</label>
-
-<p id="claimProduct">-</p>
-
-</div>
-
-
-
-<div class="detail-row">
-
-<label>요청 유형</label>
-
-<p id="claimType">-</p>
-
-</div>
-
-
-
-<div class="detail-row">
-
-<label>요청 사유</label>
-
-<p id="claimReason">-</p>
-
-</div>
-
-
-
-<div class="detail-row">
-
-<label>환불 금액</label>
-
-<p id="claimAmount">-</p>
-
-</div>
-
-
-<div class="detail-row">
-
-<label>현재 상태</label>
-
-<p id="claimStatus">-</p>
-
-</div>
-
+  <!-- 요청 내용 -->
+  <div class="info-card">
+    <h5 class="info-card-title">요청 내용</h5>
+    <div class="info-grid">
+      <div class="info-cell">
+        <span class="info-label">요청 유형</span>
+        <span class="info-value" id="claimType">-</span>
+      </div>
+      <div class="info-cell">
+        <span class="info-label">환불 금액</span>
+        <span class="info-value info-amount" id="claimAmount">-</span>
+      </div>
+      <div class="info-cell info-cell-wide">
+        <span class="info-label">요청 사유</span>
+        <span class="info-value" id="claimReason">-</span>
+      </div>
+      <div class="info-cell info-cell-wide" id="processReasonCell" hidden>
+        <span class="info-label">판매자 처리 사유</span>
+        <span class="info-value" id="claimProcessReason">-</span>
+      </div>
+    </div>
+  </div>
 
 </div>
 
@@ -282,96 +279,21 @@
 
 
 
-<!-- 상태 변경 -->
+<!-- 처리하기 : 현재 상태에서 가능한 처리만 JS가 버튼으로 만든다.
+     상태 변경(승인/반려/처리시작/교환완료)과 환불 승인이 한곳에 모인다. -->
+<div class="action-panel" id="claimActionPanel">
 
+  <h5 class="action-panel-title">처리하기</h5>
 
-<div class="action-section" id="claimStatusSection">
+  <p class="action-hint" id="claimActionHint" aria-live="polite"></p>
 
+  <div class="action-buttons" id="claimActionButtons"></div>
 
-<h5>
-클레임 상태 변경
-</h5>
-
-
-<div class="action-row">
-
-
-<!-- 선택지는 JS가 현재 상태에 맞춰 채운다.
-     백엔드가 허용하는 전이만 넣으므로 여기에 고정 목록을 두지 않는다. -->
-<select id="claimStatusSelect"></select>
-
-
-<button type="button" class="btn-primary" id="updateClaimStatusButton">
-상태 변경
-</button>
-
-
-</div>
-
-
-</div>
-
-
-<!-- 더 이상 진행할 수 있는 처리가 없을 때 -->
-<p class="claim-no-action" id="claimNoAction" hidden></p>
-
-
-
-
-
-
-<!-- 최종 환불 : 환불(RETURN) + 접수/처리중 일 때만 JS가 보여준다 -->
-
-<div class="action-section" id="claimRefundSection" hidden>
-
-
-<h5>
-최종 환불 처리
-</h5>
-
-
-<div class="refund-check">
-
-
-<p>
-✓ 환불 금액 : <span id="refundAmount">-</span>
-</p>
-
-
-<p>
-✓ 배송 상태를 환불 완료로 변경
-</p>
-
-
-<!-- 아래 둘은 주문 전체가 환불될 때만 동작한다. (SellerRefundService: order.isFullyRefunded)
-     부분 환불이면 포인트·쿠폰은 그대로 둔다. -->
-<p>
-✓ 사용 포인트 복원 <span class="refund-note">(주문 전체 환불 시)</span>
-</p>
-
-
-<p>
-✓ 사용 쿠폰 복원 <span class="refund-note">(주문 전체 환불 시)</span>
-</p>
-
-
-<!-- 백엔드가 가상결제 구조라 PG 취소는 대상에서 제외돼 있다.
-     ("NOTE: PG 결제 취소는 별도 PG 연동이 없는 가상결제 구조라 대상에서 제외한다") -->
-<p class="refund-warn">
-※ 실제 결제(PG) 취소는 이루어지지 않습니다.
-</p>
-
-
-</div>
-
-
-
-<button type="button" class="btn-danger" id="completeRefundButton">
-
-환불 완료 처리
-
-</button>
-
+  <!-- 환불 승인이 가능한 건에서만 JS가 보여준다 -->
+  <p class="refund-warn" id="claimRefundNote" hidden>
+    ※ 환불 승인 시 클레임이 완료되고 배송 상태가 환불로 전환됩니다. 주문 전체 환불이면 사용 포인트·쿠폰도 복원됩니다.
+    단, 가상결제 구조라 실제 결제(PG) 취소는 이루어지지 않습니다.
+  </p>
 
 </div>
 
@@ -403,7 +325,7 @@
       </div>
       <div class="foot-col">
         <h5>Shop</h5>
-        <a href="product-list.html?view=best">베스트</a><a href="product-list.html?cat=outer">아우터</a>
+<a href="product-list.html?cat=outer">아우터</a>
       </div>
       <div class="foot-col">
         <h5>Customer</h5>

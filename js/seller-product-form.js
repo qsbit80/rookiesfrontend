@@ -9,6 +9,21 @@
   const params = new URLSearchParams(location.search);
   const productId = params.get("id");
   const isEditMode = Boolean(productId);
+  // 목록 페이지의 "수정" 링크가 현재 판매 상태를 넘겨준다.
+  // (상세 조회 API 응답에는 status 가 없어 이 값으로 초기 선택을 맞춘다.)
+  const initialStatus = params.get("status");
+
+  // 어떤 형태의 상태 문자열이 와도 셀렉트 값(ON_SALE / SUSPENDED / SOLD_OUT)으로 정규화한다.
+  function toStatusValue(raw) {
+    const token = String(raw ?? "").trim().toUpperCase().replace(/[\s-]+/g, "_");
+    if (["SUSPENDED", "STOPPED", "STOP", "PAUSED", "SALES_STOPPED", "판매중지", "판매정지"].includes(token)) {
+      return "SUSPENDED";
+    }
+    if (["SOLD_OUT", "SOLDOUT", "OUT_OF_STOCK", "품절"].includes(token)) {
+      return "SOLD_OUT";
+    }
+    return "ON_SALE";
+  }
 
   const form = document.getElementById("productForm");
   const pageTitle = document.getElementById("pageTitle");
@@ -371,10 +386,11 @@
         body.discountRate ??
         body.discount ??
         0,
-      salesStatus:
+      salesStatus: toStatusValue(
+        initialStatus ??
         body.salesStatus ??
-        body.status ??
-        "SELLING",
+        body.status
+      ),
       description:
         body.description ??
         body.detailDescription ??
@@ -574,6 +590,33 @@
             ? "상품 수정에 실패했습니다."
             : "상품 등록에 실패했습니다.")
         );
+      }
+
+      // 판매 상태 반영: PUT 수정 API 는 status 를 다루지 않으므로 전용 PATCH 로 따로 보낸다.
+      // 품절(SOLD_OUT)은 재고에서 자동 산출되는 값이라 수동 설정 대상이 아니다.
+      if (
+        isEditMode &&
+        (salesStatus.value === "ON_SALE" || salesStatus.value === "SUSPENDED")
+      ) {
+        const statusResponse = await fetch(
+          `${SELLER_PRODUCT_API}/${encodeURIComponent(productId)}/status`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ status: salesStatus.value })
+          }
+        );
+
+        if (handleUnauthorized(statusResponse)) return;
+
+        if (!statusResponse.ok) {
+          let statusData = {};
+          try {
+            statusData = await statusResponse.json();
+          } catch (_) {}
+          throw new Error(statusData.message || "판매 상태 변경에 실패했습니다.");
+        }
       }
 
       showMessage(

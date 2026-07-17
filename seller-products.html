@@ -42,7 +42,6 @@
 <nav class="cats">
   <div class="wrap">
     <a href="product-list.html">전체</a>
-    <a href="product-list.html?view=best">베스트</a>
     <a href="brand.html">브랜드</a>
     <a href="product-list.html?cat=outer">아우터</a>
     <a href="product-list.html?cat=top">상의</a>
@@ -75,47 +74,57 @@
     <nav class="seller-page-links" aria-label="판매자 관리 메뉴">
       <a href="seller-dashboard.html">대시보드</a>
       <a class="active" aria-current="page" href="seller-products.html">상품 관리</a>
+  <a href="seller-orders.html">주문 관리</a>
       <a href="seller-sales.html?tab=sales">매출·정산</a>
       <a href="seller-qna.html?status=wait">Q&amp;A 관리</a>
       <a href="seller-claims.html">교환·환불</a>
       <a href="seller-notifications.html">쿠폰관리</a>
     </nav>
 
-    <!-- 판매중/품절/판매중지 카드는 없앴다.
-         백엔드 SellerProductResponse 에 status·stock 이 없고 목록 쿼리가 deleted=false 만
-         돌려주므로 모든 상품이 "판매 중"으로만 판정된다. 즉 품절·판매중지는 항상 0 이었다.
-         백엔드가 status/stock 을 주면 그때 되살릴 것. -->
-    <section class="summary-grid" aria-label="상품 현황">
-      <article><span>전체 상품</span><strong id="totalCount">0</strong></article>
+    <section class="summary-grid" aria-label="상품 상태별 목록">
+      <button class="status-summary is-active" type="button" data-status-filter="all" aria-pressed="true">
+        <span>전체 상품</span><strong id="totalCount">0</strong><small>모든 상품 보기</small>
+      </button>
+      <button class="status-summary" type="button" data-status-filter="selling" aria-pressed="false">
+        <span>판매중</span><strong id="sellingCount">0</strong><small>현재 판매 상품</small>
+      </button>
+      <button class="status-summary" type="button" data-status-filter="stopped" aria-pressed="false">
+        <span>판매정지</span><strong id="stoppedCount">0</strong><small>노출 중지 상품</small>
+      </button>
+      <button class="status-summary" type="button" data-status-filter="soldout" aria-pressed="false">
+        <span>품절</span><strong id="soldOutCount">0</strong><small>재고 소진 상품</small>
+      </button>
     </section>
+
+    <p class="status-api-note" id="statusApiNote" hidden></p>
 
     <section class="product-panel">
       <div class="panel-tools">
+        <div class="panel-heading">
+          <strong id="statusListTitle">전체 상품</strong>
+          <span id="statusResultCount">0개</span>
+        </div>
         <form id="productSearchForm" class="product-search" role="search">
           <label class="sr-only" for="productKeyword">상품 검색</label>
           <input id="productKeyword" type="search" placeholder="상품명 또는 상품번호 검색">
           <button type="submit">검색</button>
         </form>
-
-        <!-- 상태 필터는 없앴다. 백엔드 GET /seller/products 는 page·size 만 받아
-             status 파라미터를 조용히 무시했다. 상태 데이터 자체도 내려오지 않는다. -->
       </div>
 
       <div class="table-wrap">
         <table class="product-table">
           <thead>
-            <!-- 재고·상태 컬럼은 없앴다. 백엔드가 stock·status 를 안 내려줘서
-                 각각 항상 "-" 와 "판매 중" 만 찍히고 있었다. -->
             <tr>
               <th scope="col">상품</th>
               <th scope="col">상품번호</th>
               <th scope="col">판매가</th>
+              <th scope="col">판매상태</th>
               <th scope="col">등록일</th>
               <th scope="col">관리</th>
             </tr>
           </thead>
           <tbody id="productTableBody">
-            <tr><td class="state-cell" colspan="5">상품 목록을 불러오는 중입니다.</td></tr>
+            <tr><td class="state-cell" colspan="6">상품 목록을 불러오는 중입니다.</td></tr>
           </tbody>
         </table>
       </div>
@@ -153,7 +162,7 @@
       </div>
       <div class="foot-col">
         <h5>Shop</h5>
-        <a href="product-list.html?view=best">베스트</a><a href="product-list.html?cat=outer">아우터</a>
+<a href="product-list.html?cat=outer">아우터</a>
       </div>
       <div class="foot-col">
         <h5>Customer</h5>

@@ -114,6 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         })
         .join("");
+
+      // 옵션이 1개뿐이면 굳이 클릭 안 해도 되게 자동 선택한다.
+      if (options.length === 1 && !options[0].soldOut && options[0].stockQuantity !== 0) {
+        const onlyOption = options[0];
+        selectedOption = {
+          optionId: onlyOption.optionId,
+          additionalPrice: onlyOption.additionalPrice || 0,
+        };
+        const onlyChip = sizeChips.querySelector("button[data-option-id]");
+        if (onlyChip) onlyChip.classList.add("is-selected");
+      }
     }
 
     updateTotal();

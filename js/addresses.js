@@ -99,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
       recipientPhone: item?.recipientPhone ?? "",
       baseAddress: item?.baseAddress ?? "",
       detailAddress: item?.detailAddress ?? "",
+      zipCode: item?.zipCode ?? "",
       defaultAddress: Boolean(
         item?.defaultAddress ??
         item?.isDefault ??
@@ -188,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
       recipientPhone: $(`#${prefix}Phone`).value.trim(),
       baseAddress: $(`#${prefix}Addr`).value.trim(),
       detailAddress: $(`#${prefix}Detail`).value.trim(),
+      zipCode: $(`#${prefix}Zip`).value.trim(),
       defaultAddress: $(`#${prefix}Default`).checked
     };
   }
@@ -197,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!payload.recipientName) return "받는 사람을 입력해 주세요.";
     if (!payload.recipientPhone) return "연락처를 입력해 주세요.";
     if (!payload.baseAddress) return "주소를 입력해 주세요.";
+    if (!payload.zipCode) return "우편번호를 입력해 주세요.";
     return "";
   }
 
@@ -227,6 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("#editReceiver").value = address.recipientName;
     $("#editPhone").value = address.recipientPhone;
     $("#editAddr").value = address.baseAddress;
+    $("#editZip").value = address.zipCode;
     $("#editDetail").value = address.detailAddress;
     $("#editDefault").checked = address.defaultAddress;
 
@@ -322,6 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
           recipientPhone: address.recipientPhone,
           baseAddress: address.baseAddress,
           detailAddress: address.detailAddress,
+          zipCode: address.zipCode,
           defaultAddress: true
         })
       });

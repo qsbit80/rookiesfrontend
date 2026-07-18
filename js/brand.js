@@ -1,7 +1,8 @@
 // brand.js — 브랜드 목록 페이지
 //   조회: GET /api/v1/brands  → [{id, name, logoUrl}]
 //
-// 백엔드에 없어 UI에서 뺀 것: 영문명(en), 상품수(count), 브랜드 찜(초기 liked 조회 API 없음)
+// 백엔드에 없어 UI에서 뺀 것: 영문명(en), 상품수(count)
+// 브랜드 찜: 기능을 사용하지 않기로 하여 백엔드 API(+brand_likes 테이블)까지 제거됨
 // 초성(initial)은 이름에서 계산 → 필터 유지.
 //
 // ⚠️ auth.js → api.js → catalog.js 다음에 로드된다.

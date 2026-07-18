@@ -60,7 +60,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><strong>${won(balance)} P</strong></td>
         <td class="plus">+${won(earned)} P</td>
         <td class="minus">-${won(used)} P</td>
-        <td>- P<br><small>(소멸 예정 API 준비중)</small></td>
       </tr>
     `;
   }

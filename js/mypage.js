@@ -23,7 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // (product.js의 CatchProduct.pushRecentlyViewed/getRecentlyViewed 참고)
   const endpoints = {
     coupons: "/users/me/coupons",
-    points: "/users/me/points",
+    // 포인트 "잔액"은 마이페이지 요약(/users/me)의 point 필드에 있다.
+    // (/users/me/points 는 적립·사용 이력 목록이라 잔액 필드가 없어 요약 표시에 부적합)
+    points: "/users/me",
     reviews: "/users/me/reviews"
   };
 

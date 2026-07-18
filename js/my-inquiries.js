@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "";
     const answerBlock = answered && inq.answer
       ? `<div class="inq-answer">
-           <div class="inq-answer-head"><b>판매자 답변</b><span class="inq-answer-date">${fmtDate(inq.answeredAt)}</span></div>
+           <div class="inq-answer-head"><b>관리자 답변</b><span class="inq-answer-date">${fmtDate(inq.answeredAt)}</span></div>
            <p>${esc(inq.answer)}</p>
          </div>`
       : "";

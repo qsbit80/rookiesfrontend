@@ -281,7 +281,7 @@
       await apiFetch(`/orders/${row.orderDetailId}/confirm`, { method: 'PUT' });
       row.deliveryStatus = 'CONFIRMED';
       renderRows();
-      showToast('구매가 확정되었습니다. 리뷰를 작성해 보세요.');
+      showToast('구매가 확정되었습니다. 구매액의 1%가 포인트로 적립되었습니다. 리뷰를 작성해 보세요.');
     } catch (error) {
       showToast(error.message);
     }

@@ -1,11 +1,7 @@
 (() => {
-  // api.js의 BASE 결정 로직과 동일하게 맞춘다.
-  // (이 페이지는 api.js/auth.js를 로드하지 않으므로 여기서 자체적으로 계산)
-  const API_BASE =
-    window.CATCHCATCH_API_BASE_URL ||
-    (location.protocol === "file:" || location.port === "5500"
-      ? "http://localhost:8080/api/v1"
-      : "/api/v1");
+  // BASE 는 auth.js 가 계산해 전역(CATCHCATCH_API_BASE_URL)에 넣어둔 단일 값을 사용.
+  // (login.html 이 login.js 보다 먼저 auth.js 를 로드한다. 미로드 대비 안전망으로 /api/v1)
+  const API_BASE = window.CATCHCATCH_API_BASE_URL || "/api/v1";
 
   const apiMap = {
     user: `${API_BASE}/auth/user/login`,

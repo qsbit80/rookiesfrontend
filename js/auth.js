@@ -15,11 +15,12 @@
 (function (global) {
   "use strict";
 
-  // api.js의 BASE 결정 로직과 동일하게 맞춰 전역에 노출한다.
+  // === API BASE 단일 소스(SSOT) ===
+  // 개발/배포 환경 판별(file://·Live Server 5500 → localhost:8080, 그 외 → /api/v1 상대경로)은
+  // 프로젝트 전체에서 오직 여기서만 계산해 전역(CATCHCATCH_API_BASE_URL)에 넣는다.
   // auth.js는 거의 모든 페이지에서 페이지별 스크립트보다 먼저 로드되므로,
-  // 여기서 한 번 설정해두면 자체적으로 "window.CATCHCATCH_API_BASE_URL || '/api/v1'"
-  // 패턴을 쓰는 다른 스크립트(mypage.js, checkout.js, seller-*.js 등)도
-  // 각자 따로 수정할 필요 없이 로컬 개발 환경(file://, Live Server 5500)에서 정상 동작한다.
+  // api.js·login.js·seller-*.js 등 다른 스크립트는 이 값을 "window.CATCHCATCH_API_BASE_URL || '/api/v1'"
+  // 로 읽기만 하면 되고, 같은 판별 로직을 각자 복제하지 않는다.
   if (!global.CATCHCATCH_API_BASE_URL) {
     global.CATCHCATCH_API_BASE_URL =
       location.protocol === "file:" || location.port === "5500"

@@ -22,15 +22,9 @@
 (function (global) {
   "use strict";
 
-  // BASE 결정 (1곳에서만) — 더 이상 각 파일이 localhost:8080 을 박을 이유가 없다.
-  const BASE = (function () {
-    if (global.CATCHCATCH_API_BASE_URL) return global.CATCHCATCH_API_BASE_URL;
-    // file:// 직접 열기 또는 Live Server(5500) 프리뷰 → 백엔드 직접 호출
-    if (location.protocol === "file:" || location.port === "5500") {
-      return "http://localhost:8080/api/v1";
-    }
-    return "/api/v1"; // nginx 단일 오리진 (기본)
-  })();
+  // BASE 는 auth.js 가 계산해 전역(CATCHCATCH_API_BASE_URL)에 넣어둔 "단일 소스" 값을 그대로 쓴다.
+  // (api.js 는 항상 auth.js 다음에 로드되므로 이 시점엔 이미 설정돼 있음. 미로드 대비 안전망으로 /api/v1)
+  const BASE = global.CATCHCATCH_API_BASE_URL || "/api/v1";
 
   // 이미지 없을 때 쓰는 인라인 SVG 플레이스홀더 (외부 요청 0)
   const PLACEHOLDER =

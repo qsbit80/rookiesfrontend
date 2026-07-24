@@ -1,12 +1,8 @@
 (() => {
   "use strict";
 
-  const API_BASE = (
-    window.CATCHCATCH_API_BASE_URL ||
-    (location.protocol === "file:" || location.port === "5500"
-      ? "http://localhost:8080/api/v1"
-      : "/api/v1")
-  ).replace(/\/$/, "");
+  // BASE 는 auth.js(이 페이지에서 먼저 로드됨)가 전역에 넣어둔 단일 값을 사용. 안전망으로 /api/v1.
+  const API_BASE = (window.CATCHCATCH_API_BASE_URL || "/api/v1").replace(/\/$/, "");
   const API_URL = `${API_BASE}/seller/products`;
   const PAGE_SIZE = 10;   // 화면에 한 번에 보여줄 개수 (페이징은 클라이언트에서)
   const API_PAGE_SIZE = 100; // 새 백엔드 SellerProductService의 최대 허용 크기
